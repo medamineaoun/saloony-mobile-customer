@@ -15,248 +15,479 @@ class SignUpWidget extends StatelessWidget {
     final vm = context.watch<SignUpViewModel>();
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
+        leading: IconButton(
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.grey[300]!),
+            ),
+            child: const Icon(
+              Icons.arrow_back_ios_new,
+              size: 16,
+              color: Color(0xFF1A1A1A),
+            ),
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Title
-              Text(
-                "Sign up",
-                style: GoogleFonts.poppins(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                "Create a new account",
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
-              ),
-              const SizedBox(height: 40),
-
-              // Full name
-              TextField(
-                controller: vm.fullNameController,
-                enabled: !vm.isLoading,
-                decoration: InputDecoration(
-                  labelText: "Full Name",
-                  hintText: "Enter your full name",
-                  prefixIcon: const Icon(Icons.person_outline),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey[50],
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Email
-              TextField(
-                controller: vm.emailController,
-                enabled: !vm.isLoading,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  labelText: "Email",
-                  hintText: "Enter your email",
-                  prefixIcon: const Icon(Icons.email_outlined),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey[50],
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Phone (optionnel)
-              TextField(
-                controller: vm.phoneController,
-                enabled: !vm.isLoading,
-                keyboardType: TextInputType.phone,
-                decoration: InputDecoration(
-                  labelText: "Phone Number (Optional)",
-                  hintText: "Enter your phone number",
-                  prefixIcon: const Icon(Icons.phone_outlined),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey[50],
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Gender Selection
-              Text(
-                "Gender",
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey[700],
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: GenderOption(
-                      label: "Man",
-                      value: "MAN",
-                      selectedValue: vm.selectedGender,
-                      onTap: () => vm.setGender("MAN"),
-                      isEnabled: !vm.isLoading,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: GenderOption(
-                      label: "Woman",
-                      value: "WOMAN",
-                      selectedValue: vm.selectedGender,
-                      onTap: () => vm.setGender("WOMAN"),
-                      isEnabled: !vm.isLoading,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // Password
-              TextField(
-                controller: vm.passwordController,
-                enabled: !vm.isLoading,
-                obscureText: !vm.passwordVisible,
-                decoration: InputDecoration(
-                  labelText: "Password",
-                  hintText: "At least 8 characters",
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey[50],
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      vm.passwordVisible
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      color: Colors.deepPurple,
-                    ),
-                    onPressed: vm.togglePasswordVisibility,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // Sign Up Button
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: vm.isLoading ? null : () => vm.signUp(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
-                    disabledBackgroundColor: Colors.deepPurple.withOpacity(0.6),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: vm.isLoading
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 440),
+                child: Form(
+                  key: vm.formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: 20),
+                      
+                      // Logo
+                      Center(
+                        child: Container(
+                          width: 70,
+                          height: 70,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF9C27B0), Color(0xFF7B1FA2)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(18),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF9C27B0).withOpacity(0.3),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
                           ),
-                        )
-                      : Text(
-                          "Sign up",
-                          style: GoogleFonts.poppins(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                          child: const Icon(
+                            Icons.person_add_outlined,
+                            size: 35,
                             color: Colors.white,
                           ),
                         ),
+                      ),
+                      
+                      const SizedBox(height: 24),
+                      
+                      // Titre
+                      Text(
+                        "Create Account",
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF1A1A1A),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        "Sign up to get started",
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(
+                          fontSize: 15,
+                          color: Colors.grey[600],
+                          height: 1.5,
+                        ),
+                      ),
+
+                      const SizedBox(height: 36),
+
+                      // Full name avec validation
+                      _buildValidatedTextField(
+                        controller: vm.fullNameController,
+                        enabled: !vm.isLoading,
+                        label: "Full Name",
+                        hint: "Enter your full name",
+                        icon: Icons.person_outline_rounded,
+                        validator: vm.validateFullName,
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Email avec validation
+                      _buildValidatedTextField(
+                        controller: vm.emailController,
+                        enabled: !vm.isLoading,
+                        label: "Email",
+                        hint: "Enter your email",
+                        icon: Icons.email_outlined,
+                        keyboardType: TextInputType.emailAddress,
+                        validator: vm.validateEmail,
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Phone avec validation
+                      _buildValidatedTextField(
+                        controller: vm.phoneController,
+                        enabled: !vm.isLoading,
+                        label: "Phone Number (Optional)",
+                        hint: "Enter your phone number",
+                        icon: Icons.phone_outlined,
+                        keyboardType: TextInputType.phone,
+                        validator: vm.validatePhone,
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Gender Selection avec validation
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Gender",
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF1A1A1A),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: GenderOption(
+                                  label: "Man",
+                                  value: "MAN",
+                                  selectedValue: vm.selectedGender,
+                                  onTap: () => vm.setGender("MAN"),
+                                  isEnabled: !vm.isLoading,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: GenderOption(
+                                  label: "Woman",
+                                  value: "WOMAN",
+                                  selectedValue: vm.selectedGender,
+                                  onTap: () => vm.setGender("WOMAN"),
+                                  isEnabled: !vm.isLoading,
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (vm.genderError != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8, left: 12),
+                              child: Text(
+                                vm.genderError!,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  color: Colors.red,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Password avec validation
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Password",
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF1A1A1A),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: vm.passwordController,
+                            enabled: !vm.isLoading,
+                            obscureText: !vm.passwordVisible,
+                            validator: vm.validatePassword,
+                            decoration: InputDecoration(
+                              hintText: "At least 8 characters",
+                              hintStyle: GoogleFonts.poppins(
+                                color: Colors.grey[400],
+                                fontSize: 15,
+                              ),
+                              prefixIcon: const Icon(
+                                Icons.lock_outline_rounded,
+                                color: Color(0xFF9C27B0),
+                                size: 22,
+                              ),
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: Colors.grey[300]!),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: Colors.grey[300]!),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFF9C27B0),
+                                  width: 2,
+                                ),
+                              ),
+                              errorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: Colors.red,
+                                  width: 1,
+                                ),
+                              ),
+                              focusedErrorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: Colors.red,
+                                  width: 2,
+                                ),
+                              ),
+                              disabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: Colors.grey[200]!),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 18,
+                              ),
+                              errorStyle: GoogleFonts.poppins(
+                                fontSize: 12,
+                                height: 1.5,
+                              ),
+                              errorMaxLines: 2,
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  vm.passwordVisible
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
+                                  color: const Color(0xFF9C27B0),
+                                  size: 22,
+                                ),
+                                onPressed: vm.togglePasswordVisibility,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 32),
+
+                      // Sign Up Button
+                      Container(
+                        height: 56,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: vm.isLoading
+                                ? [Colors.grey[400]!, Colors.grey[400]!]
+                                : [const Color(0xFF9C27B0), const Color(0xFF7B1FA2)],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: vm.isLoading
+                              ? []
+                              : [
+                                  BoxShadow(
+                                    color: const Color(0xFF9C27B0).withOpacity(0.4),
+                                    blurRadius: 16,
+                                    offset: const Offset(0, 8),
+                                  ),
+                                ],
+                        ),
+                        child: ElevatedButton(
+                          onPressed: vm.isLoading ? null : () => vm.signUp(context),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: vm.isLoading
+                              ? const SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  ),
+                                )
+                              : Text(
+                                  "Sign Up",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Terms & Conditions
+                      Center(
+                        child: Text.rich(
+                          TextSpan(
+                            text: "By continuing, you agree to our ",
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                            children: [
+                              TextSpan(
+                                text: "Terms & Conditions",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  color: const Color(0xFF9C27B0),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Already have an account
+                      Center(
+                        child: InkWell(
+                          onTap: vm.isLoading
+                              ? null
+                              : () {
+                                  Navigator.pushReplacementNamed(
+                                    context,
+                                    AppRoutes.signIn,
+                                  );
+                                },
+                          child: RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Already have an account? ",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 14,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: "Sign In",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: vm.isLoading
+                                        ? Colors.grey
+                                        : const Color(0xFF9C27B0),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(height: 20),
-
-              // Terms & Conditions
-              Text.rich(
-                TextSpan(
-                  text: "By continuing, you agree to our ",
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: Colors.grey[700],
-                  ),
-                  children: [
-                    TextSpan(
-                      text: "Terms & Conditions",
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: Colors.deepPurple,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const TextSpan(text: " without reservation."),
-                  ],
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-
-              // Already have an account
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Already have an account? ",
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: Colors.grey[700],
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: vm.isLoading
-                        ? null
-                        : () {
-                            Navigator.pushReplacementNamed(
-                              context,
-                              AppRoutes.signIn,
-                            );
-                          },
-                    child: Text(
-                      "Sign in",
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: vm.isLoading
-                            ? Colors.grey
-                            : Colors.deepPurple,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildValidatedTextField({
+    required TextEditingController controller,
+    required bool enabled,
+    required String label,
+    required String hint,
+    required IconData icon,
+    TextInputType? keyboardType,
+    String? Function(String?)? validator,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF1A1A1A),
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          enabled: enabled,
+          keyboardType: keyboardType,
+          validator: validator,
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: GoogleFonts.poppins(
+              color: Colors.grey[400],
+              fontSize: 15,
+            ),
+            prefixIcon: Icon(
+              icon,
+              color: const Color(0xFF9C27B0),
+              size: 22,
+            ),
+            filled: true,
+            fillColor: Colors.white,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Color(0xFF9C27B0),
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Colors.red,
+                width: 1,
+              ),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Colors.red,
+                width: 2,
+              ),
+            ),
+            disabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[200]!),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 18,
+            ),
+            errorStyle: GoogleFonts.poppins(
+              fontSize: 12,
+              height: 1.5,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -285,11 +516,13 @@ class GenderOption extends StatelessWidget {
     return GestureDetector(
       onTap: isEnabled ? onTap : null,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.deepPurple.withOpacity(0.1) : Colors.grey[50],
+          color: isSelected 
+              ? const Color(0xFF9C27B0).withOpacity(0.08) 
+              : Colors.white,
           border: Border.all(
-            color: isSelected ? Colors.deepPurple : Colors.grey[300]!,
+            color: isSelected ? const Color(0xFF9C27B0) : Colors.grey[300]!,
             width: isSelected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(12),
@@ -299,16 +532,16 @@ class GenderOption extends StatelessWidget {
           children: [
             Icon(
               value == "MAN" ? Icons.male : Icons.female,
-              color: isSelected ? Colors.deepPurple : Colors.grey[600],
-              size: 20,
+              color: isSelected ? const Color(0xFF9C27B0) : Colors.grey[600],
+              size: 22,
             ),
             const SizedBox(width: 8),
             Text(
               label,
               style: GoogleFonts.poppins(
                 fontSize: 14,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected ? Colors.deepPurple : Colors.grey[700],
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected ? const Color(0xFF9C27B0) : Colors.grey[700],
               ),
             ),
           ],

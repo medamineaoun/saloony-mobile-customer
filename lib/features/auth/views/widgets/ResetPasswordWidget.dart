@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../../viewmodels/ResetPasswordViewModel.dart';
-
 
 class ResetPasswordWidget extends StatelessWidget {
   const ResetPasswordWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final args = ModalRoute.of(context)!.settings.arguments 
+        as Map<String, String>;
+    final email = args['email']!;
+    final code = args['code']!;
+
     return ChangeNotifierProvider(
       create: (_) => ResetPasswordViewModel(),
       child: Consumer<ResetPasswordViewModel>(
@@ -46,6 +49,8 @@ class ResetPasswordWidget extends StatelessWidget {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
+                        filled: true,
+                        fillColor: Colors.grey[100],
                         suffixIcon: IconButton(
                           icon: Icon(vm.passwordVisible1
                               ? Icons.visibility
@@ -65,6 +70,8 @@ class ResetPasswordWidget extends StatelessWidget {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
+                        filled: true,
+                        fillColor: Colors.grey[100],
                         suffixIcon: IconButton(
                           icon: Icon(vm.passwordVisible2
                               ? Icons.visibility
@@ -80,21 +87,32 @@ class ResetPasswordWidget extends StatelessWidget {
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton(
-                        onPressed: () => vm.changePassword(context),
+                        onPressed: vm.isLoading
+                            ? null
+                            : () => vm.changePassword(context, email, code),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.purple,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        child: const Text(
-                          "Change Password",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
+                        child: vm.isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                "Change Password",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
                       ),
                     ),
                   ],

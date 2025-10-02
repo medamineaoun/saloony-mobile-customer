@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../../viewmodels/ForgotPasswordViewModel.dart';
-
 
 class ForgotPasswordWidget extends StatelessWidget {
   const ForgotPasswordWidget({Key? key}) : super(key: key);
@@ -19,7 +17,7 @@ class ForgotPasswordWidget extends StatelessWidget {
               backgroundColor: Colors.white,
               appBar: AppBar(
                 backgroundColor: Colors.white,
-                iconTheme: IconThemeData(color: Colors.black87),
+                iconTheme: const IconThemeData(color: Colors.black87),
                 elevation: 0,
               ),
               body: Padding(
@@ -27,9 +25,9 @@ class ForgotPasswordWidget extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Forgot Password',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                       ),
@@ -51,7 +49,9 @@ class ForgotPasswordWidget extends StatelessWidget {
                         filled: true,
                         fillColor: Colors.grey[100],
                         contentPadding: const EdgeInsets.symmetric(
-                            vertical: 20, horizontal: 16),
+                          vertical: 20,
+                          horizontal: 16,
+                        ),
                       ),
                       validator: viewModel.emailValidator,
                       keyboardType: TextInputType.emailAddress,
@@ -61,20 +61,33 @@ class ForgotPasswordWidget extends StatelessWidget {
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton(
-                        onPressed: () => viewModel.sendResetLink(context),
+                        onPressed: viewModel.isLoading
+                            ? null
+                            : () => viewModel.sendResetCode(context),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.purple,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
+                          disabledBackgroundColor: Colors.purple.withOpacity(0.6),
                         ),
-                        child: const Text(
-                          'Send Link',
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white),
-                        ),
+                        child: viewModel.isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                'Send Code',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
                       ),
                     ),
                   ],

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:saloony/core/services/AuthService.dart';
 
-import 'package:flutter/material.dart';
-
 class ForgotPasswordViewModel extends ChangeNotifier {
+  final AuthService _authService = AuthService();
   final TextEditingController emailController = TextEditingController();
   final FocusNode emailFocusNode = FocusNode();
 
-  // Simple email validator
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+
   String? emailValidator(String? value) {
     if (value == null || value.isEmpty) {
       return 'Email is required';
@@ -19,7 +20,7 @@ class ForgotPasswordViewModel extends ChangeNotifier {
     return null;
   }
 
-  Future<void> sendResetLink(BuildContext context) async {
+  Future<void> sendResetCode(BuildContext context) async {
     final email = emailController.text.trim();
 
     if (emailValidator(email) != null) {
@@ -29,10 +30,38 @@ class ForgotPasswordViewModel extends ChangeNotifier {
       return;
     }
 
-    // TODO: Call your backend API to send reset link
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Reset link sent to $email')));
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final result = await _authService.requestPasswordReset(email);
+
+      _isLoading = false;
+      notifyListeners();
+
+      if (result['success']) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'] ?? 'Code sent to your email')),
+        );
+        
+        // Navigate to verification screen with email
+        Navigator.pushNamed(
+          context,
+          '/verifyResetCode',
+          arguments: email,
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'] ?? 'Error sending code')),
+        );
+      }
+    } catch (e) {
+      _isLoading = false;
+      notifyListeners();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
   }
 
   @override

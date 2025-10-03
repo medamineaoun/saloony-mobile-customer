@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:saloony/core/constants/app_routes.dart';
-import 'package:saloony/features/auth/viewmodels/VerifyEmailViewModel.dart';
+import '../viewmodels/ResetPasswordViewModel.dart';
 
-class VerifyEmailWidget extends StatelessWidget {
-  const VerifyEmailWidget({super.key});
+class ResetPasswordWidget extends StatelessWidget {
+  const ResetPasswordWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final email = ModalRoute.of(context)!.settings.arguments as String;
+    final args = ModalRoute.of(context)!.settings.arguments 
+        as Map<String, String>;
+    final email = args['email']!;
+    final code = args['code']!;
 
     return ChangeNotifierProvider(
-      create: (_) => VerifyEmailViewModel(email),
-      child: Consumer<VerifyEmailViewModel>(
+      create: (_) => ResetPasswordViewModel(),
+      child: Consumer<ResetPasswordViewModel>(
         builder: (context, vm, child) {
           return GestureDetector(
             onTap: () => FocusScope.of(context).unfocus(),
@@ -22,15 +24,6 @@ class VerifyEmailWidget extends StatelessWidget {
               appBar: AppBar(
                 backgroundColor: Colors.transparent,
                 elevation: 0,
-                centerTitle: true,
-                title: Text(
-                  "Verify Email",
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1B2B3E),
-                  ),
-                ),
                 leading: IconButton(
                   icon: Container(
                     padding: const EdgeInsets.all(8),
@@ -60,7 +53,7 @@ class VerifyEmailWidget extends StatelessWidget {
                           children: [
                             const SizedBox(height: 40),
                             
-                            // Image de vérification email
+                            // Image reset password
                             Center(
                               child: Container(
                                 width: 180,
@@ -71,7 +64,7 @@ class VerifyEmailWidget extends StatelessWidget {
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(20),
                                   child: Image.asset(
-                                    'images/code.png',
+                                    'assets/images/reset_password_illustration.png',
                                     fit: BoxFit.contain,
                                     errorBuilder: (context, error, stackTrace) {
                                       return Container(
@@ -93,7 +86,7 @@ class VerifyEmailWidget extends StatelessWidget {
                                           ],
                                         ),
                                         child: const Icon(
-                                          Icons.mark_email_read_outlined,
+                                          Icons.lock_open_rounded,
                                           size: 70,
                                           color: Color(0xFFF0CD97),
                                         ),
@@ -108,7 +101,7 @@ class VerifyEmailWidget extends StatelessWidget {
                             
                             // Titre
                             Text(
-                              'Check Your Email',
+                              'Reset Password',
                               textAlign: TextAlign.center,
                               style: GoogleFonts.poppins(
                                 fontSize: 28,
@@ -118,7 +111,7 @@ class VerifyEmailWidget extends StatelessWidget {
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              'A verification code has been sent to',
+                              'Enter your new password below',
                               textAlign: TextAlign.center,
                               style: GoogleFonts.poppins(
                                 fontSize: 15,
@@ -126,25 +119,15 @@ class VerifyEmailWidget extends StatelessWidget {
                                 height: 1.5,
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              email,
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.poppins(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF1B2B3E),
-                              ),
-                            ),
 
                             const SizedBox(height: 48),
 
-                            // Code input
+                            // New Password
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Verification Code',
+                                  'New Password',
                                   style: GoogleFonts.poppins(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
@@ -153,17 +136,17 @@ class VerifyEmailWidget extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 8),
                                 TextFormField(
-                                  controller: vm.codeController,
+                                  controller: vm.passwordController,
                                   enabled: !vm.isLoading,
-                                  keyboardType: TextInputType.number,
+                                  obscureText: !vm.passwordVisible1,
                                   decoration: InputDecoration(
-                                    hintText: 'Enter verification code',
+                                    hintText: 'Enter new password',
                                     hintStyle: GoogleFonts.poppins(
                                       color: Colors.grey[400],
                                       fontSize: 15,
                                     ),
                                     prefixIcon: const Icon(
-                                      Icons.pin_outlined,
+                                      Icons.lock_outline_rounded,
                                       color: Color(0xFFF0CD97),
                                       size: 22,
                                     ),
@@ -192,6 +175,86 @@ class VerifyEmailWidget extends StatelessWidget {
                                       horizontal: 16,
                                       vertical: 18,
                                     ),
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        vm.passwordVisible1
+                                            ? Icons.visibility_outlined
+                                            : Icons.visibility_off_outlined,
+                                        color: const Color(0xFFF0CD97),
+                                        size: 22,
+                                      ),
+                                      onPressed: vm.togglePasswordVisibility1,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 20),
+
+                            // Confirm Password
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Confirm Password',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF1B2B3E),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                TextFormField(
+                                  controller: vm.confirmPasswordController,
+                                  enabled: !vm.isLoading,
+                                  obscureText: !vm.passwordVisible2,
+                                  decoration: InputDecoration(
+                                    hintText: 'Confirm your password',
+                                    hintStyle: GoogleFonts.poppins(
+                                      color: Colors.grey[400],
+                                      fontSize: 15,
+                                    ),
+                                    prefixIcon: const Icon(
+                                      Icons.lock_outline_rounded,
+                                      color: Color(0xFFF0CD97),
+                                      size: 22,
+                                    ),
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(color: Colors.grey[300]!),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(color: Colors.grey[300]!),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFF1B2B3E),
+                                        width: 2,
+                                      ),
+                                    ),
+                                    disabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(color: Colors.grey[200]!),
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 18,
+                                    ),
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        vm.passwordVisible2
+                                            ? Icons.visibility_outlined
+                                            : Icons.visibility_off_outlined,
+                                        color: const Color(0xFFF0CD97),
+                                        size: 22,
+                                      ),
+                                      onPressed: vm.togglePasswordVisibility2,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -199,7 +262,7 @@ class VerifyEmailWidget extends StatelessWidget {
 
                             const SizedBox(height: 32),
 
-                            // Verify button
+                            // Change Password button
                             Container(
                               height: 56,
                               decoration: BoxDecoration(
@@ -224,23 +287,7 @@ class VerifyEmailWidget extends StatelessWidget {
                               child: ElevatedButton(
                                 onPressed: vm.isLoading
                                     ? null
-                                    : () async {
-                                        final success = await vm.verifyCode();
-                                        if (success && context.mounted) {
-                                          Navigator.pushReplacementNamed(
-                                              context, AppRoutes.home);
-                                        } else if (!success && context.mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                "Invalid or expired code",
-                                                style: GoogleFonts.poppins(),
-                                              ),
-                                              backgroundColor: Colors.red,
-                                            ),
-                                          );
-                                        }
-                                      },
+                                    : () => vm.changePassword(context, email, code),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.transparent,
                                   shadowColor: Colors.transparent,
@@ -258,7 +305,7 @@ class VerifyEmailWidget extends StatelessWidget {
                                         ),
                                       )
                                     : Text(
-                                        'Verify Code',
+                                        'Change Password',
                                         style: GoogleFonts.poppins(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
@@ -266,64 +313,6 @@ class VerifyEmailWidget extends StatelessWidget {
                                           letterSpacing: 0.5,
                                         ),
                                       ),
-                              ),
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            // Resend code
-                            Center(
-                              child: TextButton(
-                                onPressed: vm.isLoading
-                                    ? null
-                                    : () async {
-                                        final success = await vm.resendCode();
-                                        if (success && context.mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                "New code sent!",
-                                                style: GoogleFonts.poppins(),
-                                              ),
-                                              backgroundColor: Colors.green,
-                                            ),
-                                          );
-                                          vm.codeController.clear();
-                                        } else if (!success && context.mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                "Error sending code",
-                                                style: GoogleFonts.poppins(),
-                                              ),
-                                              backgroundColor: Colors.red,
-                                            ),
-                                          );
-                                        }
-                                      },
-                                child: RichText(
-                                  text: TextSpan(
-                                    children: [
-                                      TextSpan(
-                                        text: "Didn't receive the code? ",
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 14,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
-                                      TextSpan(
-                                        text: "Resend",
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                          color: vm.isLoading
-                                              ? Colors.grey
-                                              : const Color(0xFF1B2B3E),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
                               ),
                             ),
 

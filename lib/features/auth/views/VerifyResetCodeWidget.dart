@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../viewmodels/VerifyResetCodeViewModel.dart';
+import '../viewmodels/VerifyResetCodeViewModel.dart';
 
 class VerifyResetCodeWidget extends StatelessWidget {
   const VerifyResetCodeWidget({Key? key}) : super(key: key);
@@ -28,12 +28,12 @@ class VerifyResetCodeWidget extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.grey[300]!),
+                      border: Border.all(color: const Color(0xFFE1E2E2)),
                     ),
                     child: const Icon(
                       Icons.arrow_back_ios_new,
                       size: 16,
-                      color: Color(0xFF1A1A1A),
+                      color: Color(0xFF1B2B3E),
                     ),
                   ),
                   onPressed: () => Navigator.pop(context),
@@ -51,30 +51,47 @@ class VerifyResetCodeWidget extends StatelessWidget {
                           children: [
                             const SizedBox(height: 40),
                             
-                            // Logo
+                            // Image de vérification
                             Center(
                               child: Container(
-                                width: 80,
-                                height: 80,
+                                width: 180,
+                                height: 180,
                                 decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    colors: [Color(0xFF9C27B0), Color(0xFF7B1FA2)],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
                                   borderRadius: BorderRadius.circular(20),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: const Color(0xFF9C27B0).withOpacity(0.3),
-                                      blurRadius: 20,
-                                      offset: const Offset(0, 10),
-                                    ),
-                                  ],
                                 ),
-                                child: const Icon(
-                                  Icons.verified_user_rounded,
-                                  size: 40,
-                                  color: Colors.white,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(20),
+                                  child: Image.asset(
+                                    'images/code.png',
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      // Fallback si l'image n'existe pas
+                                      return Container(
+                                        width: 180,
+                                        height: 180,
+                                        decoration: BoxDecoration(
+                                          gradient: const LinearGradient(
+                                            colors: [Color(0xFF1B2B3E), Color(0xFF243441)],
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                          ),
+                                          borderRadius: BorderRadius.circular(20),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: const Color(0xFF1B2B3E).withOpacity(0.3),
+                                              blurRadius: 20,
+                                              offset: const Offset(0, 10),
+                                            ),
+                                          ],
+                                        ),
+                                        child: const Icon(
+                                          Icons.verified_user_rounded,
+                                          size: 70,
+                                          color: Color(0xFFF0CD97),
+                                        ),
+                                      );
+                                    },
+                                  ),
                                 ),
                               ),
                             ),
@@ -88,7 +105,7 @@ class VerifyResetCodeWidget extends StatelessWidget {
                               style: GoogleFonts.poppins(
                                 fontSize: 28,
                                 fontWeight: FontWeight.bold,
-                                color: const Color(0xFF1A1A1A),
+                                color: const Color(0xFF1B2B3E),
                               ),
                             ),
                             const SizedBox(height: 12),
@@ -108,7 +125,7 @@ class VerifyResetCodeWidget extends StatelessWidget {
                               style: GoogleFonts.poppins(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
-                                color: const Color(0xFF9C27B0),
+                                color: const Color(0xFF1B2B3E),
                               ),
                             ),
 
@@ -142,7 +159,7 @@ class VerifyResetCodeWidget extends StatelessWidget {
                                     style: GoogleFonts.poppins(
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold,
-                                      color: const Color(0xFF1A1A1A),
+                                      color: const Color(0xFF1B2B3E),
                                     ),
                                     decoration: InputDecoration(
                                       counterText: '',
@@ -157,7 +174,7 @@ class VerifyResetCodeWidget extends StatelessWidget {
                                       focusedBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
                                         borderSide: const BorderSide(
-                                          color: Color(0xFF9C27B0),
+                                          color: Color(0xFFF0CD97),
                                           width: 2,
                                         ),
                                       ),
@@ -192,7 +209,7 @@ class VerifyResetCodeWidget extends StatelessWidget {
                                 gradient: LinearGradient(
                                   colors: vm.isLoading
                                       ? [Colors.grey[400]!, Colors.grey[400]!]
-                                      : [const Color(0xFF9C27B0), const Color(0xFF7B1FA2)],
+                                      : [const Color(0xFF1B2B3E), const Color(0xFF243441)],
                                   begin: Alignment.centerLeft,
                                   end: Alignment.centerRight,
                                 ),
@@ -201,7 +218,7 @@ class VerifyResetCodeWidget extends StatelessWidget {
                                     ? []
                                     : [
                                         BoxShadow(
-                                          color: const Color(0xFF9C27B0).withOpacity(0.4),
+                                          color: const Color(0xFF1B2B3E).withOpacity(0.4),
                                           blurRadius: 16,
                                           offset: const Offset(0, 8),
                                         ),
@@ -224,7 +241,7 @@ class VerifyResetCodeWidget extends StatelessWidget {
                                         height: 24,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2.5,
-                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFF0CD97)),
                                         ),
                                       )
                                     : Text(
@@ -232,7 +249,7 @@ class VerifyResetCodeWidget extends StatelessWidget {
                                         style: GoogleFonts.poppins(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
-                                          color: Colors.white,
+                                          color: const Color(0xFFF0CD97),
                                           letterSpacing: 0.5,
                                         ),
                                       ),
@@ -264,7 +281,7 @@ class VerifyResetCodeWidget extends StatelessWidget {
                                           fontWeight: FontWeight.w600,
                                           color: vm.isLoading
                                               ? Colors.grey
-                                              : const Color(0xFF9C27B0),
+                                              : const Color(0xFF1B2B3E),
                                         ),
                                       ),
                                     ],

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/constants/app_routes.dart';
-import '../../viewmodels/SignInViewModel.dart';
+import '../../../core/constants/app_routes.dart';
+import '../viewmodels/SignInViewModel.dart';
 
 class SignInWidget extends StatelessWidget {
   const SignInWidget({Key? key}) : super(key: key);
@@ -30,30 +30,47 @@ class SignInWidget extends StatelessWidget {
                           children: [
                             const SizedBox(height: 40),
                             
-                            // Logo ou icône
+                            // Image de login
                             Center(
                               child: Container(
-                                width: 80,
-                                height: 80,
+                                width: 200,
+                                height: 200,
                                 decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    colors: [Color(0xFF9C27B0), Color(0xFF7B1FA2)],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
                                   borderRadius: BorderRadius.circular(20),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: const Color(0xFF9C27B0).withOpacity(0.3),
-                                      blurRadius: 20,
-                                      offset: const Offset(0, 10),
-                                    ),
-                                  ],
                                 ),
-                                child: const Icon(
-                                  Icons.lock_outline_rounded,
-                                  size: 40,
-                                  color: Colors.white,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(20),
+                                  child: Image.asset(
+                                    'images/img.png',
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      // Fallback si l'image n'existe pas
+                                      return Container(
+                                        width: 200,
+                                        height: 200,
+                                        decoration: BoxDecoration(
+                                          gradient: const LinearGradient(
+                                            colors: [Color(0xFF1B2B3E), Color(0xFF243441)],
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                          ),
+                                          borderRadius: BorderRadius.circular(20),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: const Color(0xFF1B2B3E).withOpacity(0.3),
+                                              blurRadius: 20,
+                                              offset: const Offset(0, 10),
+                                            ),
+                                          ],
+                                        ),
+                                        child: const Icon(
+                                          Icons.content_cut_rounded,
+                                          size: 80,
+                                          color: Color(0xFFF0CD97),
+                                        ),
+                                      );
+                                    },
+                                  ),
                                 ),
                               ),
                             ),
@@ -67,12 +84,12 @@ class SignInWidget extends StatelessWidget {
                               style: GoogleFonts.poppins(
                                 fontSize: 28,
                                 fontWeight: FontWeight.bold,
-                                color: const Color(0xFF1A1A1A),
+                                color: const Color(0xFF1B2B3E),
                               ),
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Sign in to continue to your account',
+                              'Sign in to continue to Saloony',
                               textAlign: TextAlign.center,
                               style: GoogleFonts.poppins(
                                 fontSize: 15,
@@ -92,7 +109,7 @@ class SignInWidget extends StatelessWidget {
                                   style: GoogleFonts.poppins(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
-                                    color: const Color(0xFF1A1A1A),
+                                    color: const Color(0xFF1B2B3E),
                                   ),
                                 ),
                                 const SizedBox(height: 8),
@@ -107,7 +124,7 @@ class SignInWidget extends StatelessWidget {
                                     ),
                                     prefixIcon: const Icon(
                                       Icons.email_outlined,
-                                      color: Color(0xFF9C27B0),
+                                      color: Color(0xFFF0CD97),
                                       size: 22,
                                     ),
                                     filled: true,
@@ -123,7 +140,7 @@ class SignInWidget extends StatelessWidget {
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: const BorderSide(
-                                        color: Color(0xFF9C27B0),
+                                        color: Color(0xFF1B2B3E),
                                         width: 2,
                                       ),
                                     ),
@@ -146,7 +163,7 @@ class SignInWidget extends StatelessWidget {
                                   style: GoogleFonts.poppins(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
-                                    color: const Color(0xFF1A1A1A),
+                                    color: const Color(0xFF1B2B3E),
                                   ),
                                 ),
                                 const SizedBox(height: 8),
@@ -161,7 +178,7 @@ class SignInWidget extends StatelessWidget {
                                     ),
                                     prefixIcon: const Icon(
                                       Icons.lock_outline_rounded,
-                                      color: Color(0xFF9C27B0),
+                                      color: Color(0xFFF0CD97),
                                       size: 22,
                                     ),
                                     filled: true,
@@ -177,7 +194,7 @@ class SignInWidget extends StatelessWidget {
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: const BorderSide(
-                                        color: Color(0xFF9C27B0),
+                                        color: Color(0xFF1B2B3E),
                                         width: 2,
                                       ),
                                     ),
@@ -190,7 +207,7 @@ class SignInWidget extends StatelessWidget {
                                         model.passwordVisible
                                             ? Icons.visibility_outlined
                                             : Icons.visibility_off_outlined,
-                                        color: const Color(0xFF9C27B0),
+                                        color: const Color(0xFFF0CD97),
                                         size: 22,
                                       ),
                                       onPressed: model.togglePasswordVisibility,
@@ -214,7 +231,7 @@ class SignInWidget extends StatelessWidget {
                                   style: GoogleFonts.poppins(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
-                                    color: const Color(0xFF9C27B0),
+                                    color: const Color(0xFFF0CD97),
                                   ),
                                 ),
                               ),
@@ -226,14 +243,14 @@ class SignInWidget extends StatelessWidget {
                               height: 56,
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
-                                  colors: [Color(0xFF9C27B0), Color(0xFF7B1FA2)],
+                                  colors: [Color(0xFF1B2B3E), Color(0xFF243441)],
                                   begin: Alignment.centerLeft,
                                   end: Alignment.centerRight,
                                 ),
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF9C27B0).withOpacity(0.4),
+                                    color: const Color(0xFF1B2B3E).withOpacity(0.4),
                                     blurRadius: 16,
                                     offset: const Offset(0, 8),
                                   ),
@@ -253,7 +270,7 @@ class SignInWidget extends StatelessWidget {
                                   style: GoogleFonts.poppins(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.white,
+                                    color: const Color(0xFFF0CD97),
                                     letterSpacing: 0.5,
                                   ),
                                 ),
@@ -335,7 +352,7 @@ class SignInWidget extends StatelessWidget {
                                         style: GoogleFonts.poppins(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w600,
-                                          color: const Color(0xFF9C27B0),
+                                          color: const Color(0xFF1B2B3E),
                                         ),
                                       ),
                                     ],
@@ -371,7 +388,7 @@ class SignInWidget extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey[300]!),
+          border: Border.all(color: const Color(0xFFE1E2E2)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -387,7 +404,7 @@ class SignInWidget extends StatelessWidget {
               style: GoogleFonts.poppins(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFF1A1A1A),
+                color: const Color(0xFF1B2B3E),
               ),
             ),
           ],

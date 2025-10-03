@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:saloony/features/Home/views/HomePageWidget.dart';
 import 'package:saloony/features/auth/views/VerifyEmailWidget.dart';
-import 'package:saloony/features/auth/views/widgets/VerifyResetCodeWidget.dart';
+import 'package:saloony/features/auth/views/VerifyResetCodeWidget.dart';
 import 'package:saloony/features/splash/splash_page.dart';
 
 import '../../data/models/user_model.dart';
-import '../../features/auth/views/widgets/ForgotPasswordWidget.dart';
-import '../../features/auth/views/widgets/LinkSentWidget.dart';
-import '../../features/auth/views/widgets/ResetPasswordWidget.dart';
-import '../../features/auth/views/widgets/SignInWidget.dart';
-import '../../features/auth/views/widgets/SignUpWidget.dart';
-import '../../features/auth/views/widgets/SuccessResetWidget.dart';
+import '../../features/auth/views/ForgotPasswordWidget.dart';
+import '../../features/auth/views/LinkSentWidget.dart';
+import '../../features/auth/views/ResetPasswordWidget.dart';
+import '../../features/auth/views/SignInWidget.dart';
+import '../../features/auth/views/SignUpWidget.dart';
+import '../../features/auth/views/SuccessResetWidget.dart';
 import '../../features/profile/views/profile_widget.dart';
 
 class AppRoutes {

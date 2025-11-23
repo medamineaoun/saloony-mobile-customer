@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:saloony/core/services/AuthService.dart';
+import 'package:saloony/core/services/ToastService.dart';
 
 class ForgotPasswordViewModel extends ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -24,9 +25,7 @@ class ForgotPasswordViewModel extends ChangeNotifier {
     final email = emailController.text.trim();
 
     if (emailValidator(email) != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid email')),
-      );
+      ToastService.showError(context, "Please enter a valid email");
       return;
     }
 
@@ -40,27 +39,22 @@ class ForgotPasswordViewModel extends ChangeNotifier {
       notifyListeners();
 
       if (result['success']) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result['message'] ?? 'Code sent to your email')),
-        );
-        
-        // Navigate to verification screen with email
+        ToastService.showSuccess(context, result['message'] ?? "Code sent to your email");
+
+        // Navigation
         Navigator.pushNamed(
           context,
           '/verifyResetCode',
           arguments: email,
         );
+
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result['message'] ?? 'Error sending code')),
-        );
+        ToastService.showError(context, result['message'] ?? "Error sending code");
       }
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      ToastService.showError(context, "Error : $e");
     }
   }
 

@@ -31,6 +31,13 @@ class ResetPasswordWidget extends StatelessWidget {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: const Color(0xFFE1E2E2)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: const Icon(
                       Icons.arrow_back_ios_new,
@@ -51,43 +58,41 @@ class ResetPasswordWidget extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            const SizedBox(height: 40),
+                            const SizedBox(height: 20),
                             
                             // Image reset password
                             Center(
                               child: Container(
-                                width: 180,
-                                height: 180,
+                                width: 140,
+                                height: 140,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFF1B2B3E).withOpacity(0.15),
+                                      blurRadius: 30,
+                                      offset: const Offset(0, 10),
+                                    ),
+                                  ],
                                 ),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(20),
                                   child: Image.asset(
-                                    'assets/images/reset_password_illustration.png',
+                                    'assets/images/reset_password_illustration.jpg',
                                     fit: BoxFit.contain,
                                     errorBuilder: (context, error, stackTrace) {
                                       return Container(
-                                        width: 180,
-                                        height: 180,
                                         decoration: BoxDecoration(
                                           gradient: const LinearGradient(
-                                            colors: [Color(0xFF1B2B3E), Color(0xFF243441)],
+                                            colors: [Color(0xFF1B2B3E), Color(0xFF2D4356)],
                                             begin: Alignment.topLeft,
                                             end: Alignment.bottomRight,
                                           ),
                                           borderRadius: BorderRadius.circular(20),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: const Color(0xFF1B2B3E).withOpacity(0.3),
-                                              blurRadius: 20,
-                                              offset: const Offset(0, 10),
-                                            ),
-                                          ],
                                         ),
                                         child: const Icon(
-                                          Icons.lock_open_rounded,
-                                          size: 70,
+                                          Icons.lock_reset_rounded,
+                                          size: 60,
                                           color: Color(0xFFF0CD97),
                                         ),
                                       );
@@ -97,7 +102,7 @@ class ResetPasswordWidget extends StatelessWidget {
                               ),
                             ),
                             
-                            const SizedBox(height: 32),
+                            const SizedBox(height: 28),
                             
                             // Titre
                             Text(
@@ -107,20 +112,21 @@ class ResetPasswordWidget extends StatelessWidget {
                                 fontSize: 28,
                                 fontWeight: FontWeight.bold,
                                 color: const Color(0xFF1B2B3E),
+                                letterSpacing: -0.5,
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 8),
                             Text(
-                              'Enter your new password below',
+                              'Create a strong password to secure your account',
                               textAlign: TextAlign.center,
                               style: GoogleFonts.poppins(
-                                fontSize: 15,
+                                fontSize: 14,
                                 color: Colors.grey[600],
                                 height: 1.5,
                               ),
                             ),
 
-                            const SizedBox(height: 48),
+                            const SizedBox(height: 36),
 
                             // New Password
                             Column(
@@ -139,6 +145,7 @@ class ResetPasswordWidget extends StatelessWidget {
                                   controller: vm.passwordController,
                                   enabled: !vm.isLoading,
                                   obscureText: !vm.passwordVisible1,
+                                  onChanged: (_) => vm.validatePassword(),
                                   decoration: InputDecoration(
                                     hintText: 'Enter new password',
                                     hintStyle: GoogleFonts.poppins(
@@ -167,6 +174,20 @@ class ResetPasswordWidget extends StatelessWidget {
                                         width: 2,
                                       ),
                                     ),
+                                    errorBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFFE74C3C),
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                    focusedErrorBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFFE74C3C),
+                                        width: 2,
+                                      ),
+                                    ),
                                     disabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: BorderSide(color: Colors.grey[200]!),
@@ -190,6 +211,56 @@ class ResetPasswordWidget extends StatelessWidget {
                               ],
                             ),
 
+                            const SizedBox(height: 16),
+
+                            // Password Requirements
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.grey[200]!),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Password must contain:',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFF1B2B3E),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  _buildRequirement(
+                                    'At least 8 characters',
+                                    vm.hasMinLength,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  _buildRequirement(
+                                    'One uppercase letter (A-Z)',
+                                    vm.hasUppercase,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  _buildRequirement(
+                                    'One lowercase letter (a-z)',
+                                    vm.hasLowercase,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  _buildRequirement(
+                                    'One number (0-9)',
+                                    vm.hasNumber,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  _buildRequirement(
+                                    'One special character (!@#\$%^&*)',
+                                    vm.hasSpecialChar,
+                                  ),
+                                ],
+                              ),
+                            ),
+
                             const SizedBox(height: 20),
 
                             // Confirm Password
@@ -209,6 +280,7 @@ class ResetPasswordWidget extends StatelessWidget {
                                   controller: vm.confirmPasswordController,
                                   enabled: !vm.isLoading,
                                   obscureText: !vm.passwordVisible2,
+                                  onChanged: (_) => vm.validatePassword(),
                                   decoration: InputDecoration(
                                     hintText: 'Confirm your password',
                                     hintStyle: GoogleFonts.poppins(
@@ -237,6 +309,20 @@ class ResetPasswordWidget extends StatelessWidget {
                                         width: 2,
                                       ),
                                     ),
+                                    errorBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFFE74C3C),
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                    focusedErrorBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFFE74C3C),
+                                        width: 2,
+                                      ),
+                                    ),
                                     disabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: BorderSide(color: Colors.grey[200]!),
@@ -257,6 +343,28 @@ class ResetPasswordWidget extends StatelessWidget {
                                     ),
                                   ),
                                 ),
+                                if (vm.confirmPasswordController.text.isNotEmpty && 
+                                    !vm.passwordsMatch)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 8, left: 4),
+                                    child: Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.error_outline,
+                                          size: 16,
+                                          color: Color(0xFFE74C3C),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          'Passwords do not match',
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 12,
+                                            color: const Color(0xFFE74C3C),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                               ],
                             ),
 
@@ -267,25 +375,25 @@ class ResetPasswordWidget extends StatelessWidget {
                               height: 56,
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
-                                  colors: vm.isLoading
-                                      ? [Colors.grey[400]!, Colors.grey[400]!]
-                                      : [const Color(0xFF1B2B3E), const Color(0xFF243441)],
+                                  colors: (vm.isLoading || !vm.isPasswordValid)
+                                      ? [Colors.grey[300]!, Colors.grey[400]!]
+                                      : [const Color(0xFF1B2B3E), const Color(0xFF2D4356)],
                                   begin: Alignment.centerLeft,
                                   end: Alignment.centerRight,
                                 ),
                                 borderRadius: BorderRadius.circular(12),
-                                boxShadow: vm.isLoading
+                                boxShadow: (vm.isLoading || !vm.isPasswordValid)
                                     ? []
                                     : [
                                         BoxShadow(
-                                          color: const Color(0xFF1B2B3E).withOpacity(0.4),
-                                          blurRadius: 16,
-                                          offset: const Offset(0, 8),
+                                          color: const Color(0xFF1B2B3E).withOpacity(0.3),
+                                          blurRadius: 20,
+                                          offset: const Offset(0, 10),
                                         ),
                                       ],
                               ),
                               child: ElevatedButton(
-                                onPressed: vm.isLoading
+                                onPressed: (vm.isLoading || !vm.isPasswordValid)
                                     ? null
                                     : () => vm.changePassword(context, email, code),
                                 style: ElevatedButton.styleFrom(
@@ -301,7 +409,7 @@ class ResetPasswordWidget extends StatelessWidget {
                                         height: 24,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2.5,
-                                          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFF0CD97)),
+                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                                         ),
                                       )
                                     : Text(
@@ -309,10 +417,44 @@ class ResetPasswordWidget extends StatelessWidget {
                                         style: GoogleFonts.poppins(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
-                                          color: const Color(0xFFF0CD97),
+                                          color: Colors.white,
                                           letterSpacing: 0.5,
                                         ),
                                       ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 24),
+
+                            // Security note
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF0CD97).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: const Color(0xFFF0CD97).withOpacity(0.3),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.security_rounded,
+                                    color: const Color(0xFFF0CD97),
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      'Your password is encrypted and secure',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 12,
+                                        color: const Color(0xFF1B2B3E),
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
 
@@ -328,6 +470,38 @@ class ResetPasswordWidget extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildRequirement(String text, bool isMet) {
+    return Row(
+      children: [
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          width: 20,
+          height: 20,
+          decoration: BoxDecoration(
+            color: isMet ? const Color(0xFF27AE60) : Colors.grey[300],
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            isMet ? Icons.check : Icons.close,
+            size: 14,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            text,
+            style: GoogleFonts.poppins(
+              fontSize: 13,
+              color: isMet ? const Color(0xFF27AE60) : Colors.grey[600],
+              fontWeight: isMet ? FontWeight.w500 : FontWeight.normal,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

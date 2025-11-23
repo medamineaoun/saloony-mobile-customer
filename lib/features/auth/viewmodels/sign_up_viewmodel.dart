@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:saloony/core/services/AuthService.dart';
+import 'package:saloony/core/services/ToastService.dart';
 
 class SignUpViewModel extends ChangeNotifier {
   final formKey = GlobalKey<FormState>();
-  final fullNameController = TextEditingController();
+
+  final firstNameController = TextEditingController();
+  final lastNameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final phoneController = TextEditingController();
+
+  final AuthService _authService = AuthService();
 
   bool _passwordVisible = false;
   bool get passwordVisible => _passwordVisible;
@@ -14,14 +19,19 @@ class SignUpViewModel extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  String _selectedGender = ''; // Vide par défaut pour forcer la sélection
+  String _selectedGender = '';
   String get selectedGender => _selectedGender;
 
   String? _genderError;
   String? get genderError => _genderError;
 
-  final AuthService _authService = AuthService();
+  bool _termsAccepted = false;
+  bool get termsAccepted => _termsAccepted;
 
+  String? _termsError;
+  String? get termsError => _termsError;
+
+  // Toggle password
   void togglePasswordVisibility() {
     _passwordVisible = !_passwordVisible;
     notifyListeners();
@@ -29,30 +39,34 @@ class SignUpViewModel extends ChangeNotifier {
 
   void setGender(String gender) {
     _selectedGender = gender;
-    _genderError = null; // Efface l'erreur quand un genre est sélectionné
-    notifyListeners();
-  }
-
-  void setGenderError(String error) {
-    _genderError = error;
-    notifyListeners();
-  }
-
-  void clearGenderError() {
     _genderError = null;
     notifyListeners();
   }
 
-  // Validateurs
-  String? validateFullName(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter your full name';
+  void setTermsAccepted(bool value) {
+    _termsAccepted = value;
+    _termsError = null;
+    notifyListeners();
+  }
+
+  // ---------------- VALIDATORS ----------------
+
+  String? validateFirstName(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'First name is required';
     }
-    if (value.length < 3) {
-      return 'Name must be at least 3 characters';
+    if (value.trim().length < 2) {
+      return 'First name must be at least 2 characters';
     }
-    if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(value)) {
-      return 'Name can only contain letters';
+    return null;
+  }
+
+  String? validateLastName(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Last name is required';
+    }
+    if (value.trim().length < 2) {
+      return 'Last name must be at least 2 characters';
     }
     return null;
   }
@@ -69,57 +83,66 @@ class SignUpViewModel extends ChangeNotifier {
   }
 
   String? validatePhone(String? value) {
-    if (value != null && value.isNotEmpty) {
-      if (!RegExp(r'^\+?[\d\s-]{8,}$').hasMatch(value)) {
-        return 'Please enter a valid phone number';
-      }
+    if (value == null || value.trim().isEmpty) return null;
+
+    if (!RegExp(r'^\+?[\d\s-]{8,}$').hasMatch(value)) {
+      return 'Please enter a valid phone number';
     }
     return null;
   }
 
   String? validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter a password';
+    if (value == null || value.isEmpty) return 'Please enter a password';
+    if (value.length < 8) return 'Password must be at least 8 characters';
+
+    List<String> missing = [];
+
+    if (!RegExp(r'[A-Z]').hasMatch(value)) missing.add('uppercase letter');
+    if (!RegExp(r'[a-z]').hasMatch(value)) missing.add('lowercase letter');
+    if (!RegExp(r'[0-9]').hasMatch(value)) missing.add('number');
+    if (!RegExp(r'[!@#\$&*~]').hasMatch(value)) {
+      missing.add('special character (!@#\$&*~)');
     }
-    if (value.length < 8) {
-      return 'Password must be at least 8 characters';
-    }
-    if (!RegExp(r'[A-Z]').hasMatch(value)) {
-      return 'Must contain at least one uppercase letter';
-    }
-    if (!RegExp(r'[a-z]').hasMatch(value)) {
-      return 'Must contain at least one lowercase letter';
-    }
-    if (!RegExp(r'[0-9]').hasMatch(value)) {
-      return 'Must contain at least one number';
-    }
+
+    if (missing.isNotEmpty) return 'Missing: ${missing.join(', ')}';
+
     return null;
   }
 
+  // ---------------- SIGN UP ----------------
+
   Future<void> signUp(BuildContext context) async {
-    // Validation du formulaire
+    // 1️⃣ Validate form
     if (!formKey.currentState!.validate()) {
+      ToastService.showError(context, 'Please fill all required fields');
       return;
     }
 
-    // Validation du genre
+    // 2️⃣ Validate gender
     if (_selectedGender.isEmpty) {
-      setGenderError('Please select your gender');
+      _genderError = 'Please select your gender';
+      notifyListeners();
+      ToastService.showError(context, 'Please select your gender');
       return;
     }
 
-    // Récupération des valeurs
-    final fullName = fullNameController.text.trim();
+    // 3️⃣ Validate terms
+    if (!_termsAccepted) {
+      _termsError =
+          'You must accept the Terms & Conditions and Privacy Policy';
+      notifyListeners();
+      ToastService.showError(context, 'Please accept the terms');
+      return;
+    }
+
+    final firstName = firstNameController.text.trim();
+    final lastName = lastNameController.text.trim();
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
-    final phone = phoneController.text.trim();
 
-    // Séparer prénom et nom
-    List<String> nameParts = fullName.split(' ');
-    String firstName = nameParts.first;
-    String lastName = nameParts.length > 1 
-        ? nameParts.sublist(1).join(' ') 
-        : '';
+    final phone = phoneController.text.trim().isEmpty
+        ? ""
+        : phoneController.text.trim();
 
     _isLoading = true;
     notifyListeners();
@@ -130,57 +153,54 @@ class SignUpViewModel extends ChangeNotifier {
         lastName: lastName,
         email: email,
         password: password,
-        phoneNumber: phone.isEmpty ? "00000000" : phone,
-        gender: _selectedGender,  // MAN ou WOMAN
-        role: "CUSTOMER",         // Par défaut CUSTOMER
+        phoneNumber: phone,
+        gender: _selectedGender,
+        role: "CUSTOMER",
       );
 
       _isLoading = false;
       notifyListeners();
 
+      final message =
+          result['message'] ?? 'Registration completed successfully.';
+
       if (result['success']) {
-        _showSuccessSnackBar(context, result['message']);
-        
-        // Navigation vers la page de vérification avec l'email
+        clearFields();
+        ToastService.showSuccess(context, message);
+
         await Future.delayed(const Duration(milliseconds: 500));
-        Navigator.pushNamed(
-          context,
-          "/verifyEmail",
-          arguments: email,
-        );
+        Navigator.pushNamed(context, "/verifyEmail", arguments: email);
       } else {
-        _showErrorSnackBar(context, result['message']);
+        ToastService.showError(context, message);
       }
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-      _showErrorSnackBar(context, "Erreur inattendue: $e");
+      ToastService.showError(context, "Unexpected error: $e");
     }
   }
 
-  void _showSuccessSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 3),
-      ),
-    );
+  // ---------------- RESET FORM ----------------
+  void clearFields() {
+    firstNameController.clear();
+    lastNameController.clear();
+    emailController.clear();
+    passwordController.clear();
+    phoneController.clear();
+
+    _selectedGender = '';
+    _genderError = null;
+    _termsAccepted = false;
+    _termsError = null;
+
+    notifyListeners();
   }
 
-  void _showErrorSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 3),
-      ),
-    );
-  }
-
+  // ---------------- DISPOSE ----------------
   @override
   void dispose() {
-    fullNameController.dispose();
+    firstNameController.dispose();
+    lastNameController.dispose();
     emailController.dispose();
     passwordController.dispose();
     phoneController.dispose();

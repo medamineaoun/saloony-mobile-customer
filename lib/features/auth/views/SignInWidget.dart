@@ -41,7 +41,7 @@ class SignInWidget extends StatelessWidget {
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(20),
                                   child: Image.asset(
-                                    'images/img.png',
+                                    'assets/images/img.png',
                                     fit: BoxFit.contain,
                                     errorBuilder: (context, error, stackTrace) {
                                       // Fallback si l'image n'existe pas

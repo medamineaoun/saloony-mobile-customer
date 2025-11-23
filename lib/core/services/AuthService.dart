@@ -8,9 +8,6 @@ class AuthService {
   static String get _accessTokenKey => Config.accessTokenKey;
   static String get _refreshTokenKey => Config.refreshTokenKey;
 
-  // ==================== HELPERS ====================
-
-  /// 🔑 Gérer snake_case et camelCase pour les tokens
   Map<String, String?> _parseTokens(Map<String, dynamic> data) {
     return {
       'accessToken': data['access_token'] ?? data['accessToken'],
@@ -45,7 +42,6 @@ class AuthService {
     };
   }
 
-  // ==================== INSCRIPTION ====================
 
   Future<Map<String, dynamic>> signUp({
     required String firstName,
@@ -53,8 +49,8 @@ class AuthService {
     required String email,
     required String password,
     required String phoneNumber,
-    required String gender, // "MAN" ou "WOMAN"
-    required String role,   // "CUSTOMER", "SPECIALIST", "ADMIN"
+    required String gender, 
+    required String role,   
   }) async {
     try {
       final url = Uri.parse('$baseUrl/signup');
@@ -96,7 +92,6 @@ class AuthService {
     }
   }
 
-  // ==================== CONNEXION ====================
 
   Future<Map<String, dynamic>> signIn({
     required String email,
@@ -136,7 +131,6 @@ class AuthService {
     }
   }
 
-  // ==================== VÉRIFICATION SIGNUP ====================
 
   Future<Map<String, dynamic>> requestSignupVerification(String email) async {
     try {
@@ -188,12 +182,11 @@ class AuthService {
     }
   }
 
-  // ==================== RESET PASSWORD ====================
 
   Future<Map<String, dynamic>> requestPasswordReset(String email) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/request-reset?email=$email'),
+        Uri.parse('$baseUrl/send-verification-email?email=$email'),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -242,7 +235,6 @@ class AuthService {
     }
   }
 
-  // ==================== REFRESH TOKEN ====================
 
   Future<Map<String, dynamic>> refreshToken() async {
     try {
@@ -281,7 +273,6 @@ class AuthService {
     }
   }
 
-  // ==================== CURRENT USER ====================
 
   Future<Map<String, dynamic>> getCurrentUser() async {
     try {
@@ -301,7 +292,6 @@ class AuthService {
     }
   }
 
-  // ==================== DÉCONNEXION ====================
 
   Future<void> signOut() async {
     final prefs = await SharedPreferences.getInstance();

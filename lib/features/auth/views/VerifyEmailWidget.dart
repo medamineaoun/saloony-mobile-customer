@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:saloony/core/constants/app_routes.dart';
@@ -12,7 +13,7 @@ class VerifyEmailWidget extends StatelessWidget {
     final email = ModalRoute.of(context)!.settings.arguments as String;
 
     return ChangeNotifierProvider(
-      create: (_) => VerifyEmailViewModel(email),
+      create: (_) => VerifyEmailViewModel(email, context),
       child: Consumer<VerifyEmailViewModel>(
         builder: (context, vm, child) {
           return GestureDetector(
@@ -71,7 +72,7 @@ class VerifyEmailWidget extends StatelessWidget {
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(20),
                                   child: Image.asset(
-                                    'images/code.png',
+                                    'assets/images/code.png',
                                     fit: BoxFit.contain,
                                     errorBuilder: (context, error, stackTrace) {
                                       return Container(
@@ -139,7 +140,7 @@ class VerifyEmailWidget extends StatelessWidget {
 
                             const SizedBox(height: 48),
 
-                            // Code input
+                            // Code input avec 6 cases
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -151,48 +152,10 @@ class VerifyEmailWidget extends StatelessWidget {
                                     color: const Color(0xFF1B2B3E),
                                   ),
                                 ),
-                                const SizedBox(height: 8),
-                                TextFormField(
+                                const SizedBox(height: 12),
+                                CodeInputField(
                                   controller: vm.codeController,
                                   enabled: !vm.isLoading,
-                                  keyboardType: TextInputType.number,
-                                  decoration: InputDecoration(
-                                    hintText: 'Enter verification code',
-                                    hintStyle: GoogleFonts.poppins(
-                                      color: Colors.grey[400],
-                                      fontSize: 15,
-                                    ),
-                                    prefixIcon: const Icon(
-                                      Icons.pin_outlined,
-                                      color: Color(0xFFF0CD97),
-                                      size: 22,
-                                    ),
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(color: Colors.grey[300]!),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(color: Colors.grey[300]!),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(
-                                        color: Color(0xFF1B2B3E),
-                                        width: 2,
-                                      ),
-                                    ),
-                                    disabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(color: Colors.grey[200]!),
-                                    ),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 18,
-                                    ),
-                                  ),
                                 ),
                               ],
                             ),
@@ -339,6 +302,136 @@ class VerifyEmailWidget extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+// Widget personnalisé pour l'input de code à 6 chiffres
+class CodeInputField extends StatefulWidget {
+  final TextEditingController controller;
+  final bool enabled;
+
+  const CodeInputField({
+    super.key,
+    required this.controller,
+    this.enabled = true,
+  });
+
+  @override
+  State<CodeInputField> createState() => _CodeInputFieldState();
+}
+
+class _CodeInputFieldState extends State<CodeInputField> {
+  final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
+  final List<TextEditingController> _controllers = List.generate(6, (_) => TextEditingController());
+
+  @override
+  void initState() {
+    super.initState();
+    // Écouter les changements du controller principal
+    widget.controller.addListener(_onMainControllerChanged);
+  }
+
+  void _onMainControllerChanged() {
+    final text = widget.controller.text;
+    if (text.isEmpty) {
+      // Clear all fields
+      for (var controller in _controllers) {
+        controller.clear();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onMainControllerChanged);
+    for (var node in _focusNodes) {
+      node.dispose();
+    }
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  void _onChanged(int index, String value) {
+    if (value.isNotEmpty && index < 5) {
+      _focusNodes[index + 1].requestFocus();
+    }
+    
+    // Mettre à jour le controller principal
+    _updateMainController();
+  }
+
+  void _onKeyEvent(int index, KeyEvent event) {
+    if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.backspace) {
+      if (_controllers[index].text.isEmpty && index > 0) {
+        _focusNodes[index - 1].requestFocus();
+      }
+    }
+  }
+
+  void _updateMainController() {
+    final code = _controllers.map((c) => c.text).join();
+    widget.controller.text = code;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: List.generate(6, (index) {
+        return SizedBox(
+          width: 50,
+          height: 60,
+          child: KeyboardListener(
+            focusNode: FocusNode(),
+            onKeyEvent: (event) => _onKeyEvent(index, event),
+            child: TextField(
+              controller: _controllers[index],
+              focusNode: _focusNodes[index],
+              enabled: widget.enabled,
+              textAlign: TextAlign.center,
+              keyboardType: TextInputType.number,
+              maxLength: 1,
+              style: GoogleFonts.poppins(
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF1B2B3E),
+              ),
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+              ],
+              decoration: InputDecoration(
+                counterText: '',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey[300]!),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey[300]!, width: 1.5),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: Color(0xFF1B2B3E),
+                    width: 2,
+                  ),
+                ),
+                disabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey[200]!),
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              onChanged: (value) => _onChanged(index, value),
+            ),
+          ),
+        );
+      }),
     );
   }
 }

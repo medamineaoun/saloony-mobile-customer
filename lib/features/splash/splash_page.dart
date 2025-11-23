@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:saloony/core/constants/app_routes.dart';
+import 'package:saloony/core/services/AuthService.dart';
+import 'package:saloony/core/services/TokenHelper.dart';
 
 class SaloonySplashPage extends StatefulWidget {
   const SaloonySplashPage({Key? key}) : super(key: key);
@@ -30,12 +32,62 @@ class _SaloonySplashPageState extends State<SaloonySplashPage>
     _setupAnimations();
     _startAnimations();
     
-    // Redirection après 4 secondes - avec vérification mounted
-    Timer(const Duration(seconds: 4), () {
+    // ✅ Vérification de l'authentification après 3 secondes
+    Timer(const Duration(seconds: 3), () {
       if (mounted) {
-      Navigator.pushReplacementNamed(context, AppRoutes.signIn);
+        _checkAuthAndNavigate();
       }
     });
+  }
+
+  // 🔐 Vérifier l'authentification et naviguer
+  Future<void> _checkAuthAndNavigate() async {
+    try {
+      final authService = AuthService();
+      
+      // Récupérer le token
+      final accessToken = await authService.getAccessToken();
+      
+      // Vérifier si l'utilisateur est authentifié
+      if (accessToken != null && accessToken.isNotEmpty) {
+        // Vérifier si le token n'est pas expiré
+        final isExpired = TokenHelper.isTokenExpired(accessToken);
+        
+        if (!isExpired) {
+          // ✅ Token valide → Page d'accueil
+          if (mounted) {
+            Navigator.pushReplacementNamed(context, AppRoutes.home);
+          }
+        } else {
+          // 🔄 Token expiré → Essayer de rafraîchir
+          final refreshResult = await authService.refreshToken();
+          
+          if (refreshResult['success'] == true) {
+            // ✅ Refresh réussi → Page d'accueil
+            if (mounted) {
+              Navigator.pushReplacementNamed(context, AppRoutes.home);
+            }
+          } else {
+            // ❌ Refresh échoué → Page de connexion
+            await authService.signOut();
+            if (mounted) {
+              Navigator.pushReplacementNamed(context, AppRoutes.signIn);
+            }
+          }
+        }
+      } else {
+        // ❌ Pas de token → Page de connexion
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, AppRoutes.signIn);
+        }
+      }
+    } catch (e) {
+      // En cas d'erreur → Page de connexion
+      debugPrint('Erreur lors de la vérification de l\'authentification: $e');
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, AppRoutes.signIn);
+      }
+    }
   }
 
   void _setupAnimations() {
@@ -215,7 +267,7 @@ class _SaloonySplashPageState extends State<SaloonySplashPage>
                             return Opacity(
                               opacity: _fadeAnimation.value,
                               child: const Text(
-                                "",
+                                "Your Beauty, Our Priority",
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Colors.white70,
@@ -280,6 +332,8 @@ class _SaloonySplashPageState extends State<SaloonySplashPage>
                 double animValue = _letterAnimations.length > index 
                   ? _letterAnimations[index].value 
                   : _fadeAnimation.value;
+
+                animValue = animValue.clamp(0.0, 1.0);
                 
                 return Transform.translate(
                   offset: Offset(0, (1 - animValue) * 30),

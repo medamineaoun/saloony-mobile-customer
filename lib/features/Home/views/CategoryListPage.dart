@@ -1,61 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:saloony/core/services/TreatmentService.dart';
-import 'package:saloony/core/models/Treatment.dart';
+import 'package:saloony/core/enum/SalonCategory.dart';
 import 'package:saloony/core/constants/SaloonyColors.dart';
 import 'package:saloony/features/Home/views/BottomNavBar.dart';
-import 'package:saloony/features/Home/views/SalonsByServicePage.dart';
+import 'package:saloony/features/Home/views/SalonsByCategoryPage.dart';
 
-class ServiceListPage extends StatefulWidget {
-  const ServiceListPage({super.key});
+class CategoryListPage extends StatefulWidget {
+  const CategoryListPage({super.key});
 
   @override
-  State<ServiceListPage> createState() => _ServiceListPageState();
+  State<CategoryListPage> createState() => _CategoryListPageState();
 }
 
-class _ServiceListPageState extends State<ServiceListPage> {
-  late TreatmentService _treatmentService;
-  List<Treatment> _treatments = [];
-  bool _loading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _treatmentService = TreatmentService();
-    _loadTreatments();
-  }
-
-  Future<void> _loadTreatments() async {
-    try {
-      final result = await _treatmentService.getAllTreatments();
-      if (result['success']) {
-        final treatments = (result['treatments'] as List)
-            .map((t) => Treatment.fromJson(t as Map<String, dynamic>))
-            .toList();
-        setState(() {
-          _treatments = treatments;
-          _loading = false;
-        });
-      } else {
-        setState(() => _loading = false);
-      }
-    } catch (e) {
-      debugPrint('Error loading treatments: $e');
-      setState(() => _loading = false);
-    }
-  }
-
-  void _navigateToSalons(Treatment treatment) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SalonsByServicePage(treatment: treatment),
-      ),
-    );
-  }
-
+class _CategoryListPageState extends State<CategoryListPage> {
   @override
   Widget build(BuildContext context) {
+    final categories = SalonCategory.values;
+
     return Scaffold(
       backgroundColor: SaloonyColors.background,
       appBar: AppBar(
@@ -66,7 +27,7 @@ class _ServiceListPageState extends State<ServiceListPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'All Services',
+          'All Categories',
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -75,21 +36,19 @@ class _ServiceListPageState extends State<ServiceListPage> {
         ),
         centerTitle: true,
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _buildServicesList(),
+      body: _buildCategoriesList(categories),
       bottomNavigationBar: BottomNavBar(),
     );
   }
 
-  Widget _buildServicesList() {
+  Widget _buildCategoriesList(List<SalonCategory> categories) {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: _treatments.length,
+      itemCount: categories.length,
       itemBuilder: (context, index) {
-        final treatment = _treatments[index];
+        final category = categories[index];
         return GestureDetector(
-          onTap: () => _navigateToSalons(treatment),
+          onTap: () => _navigateToSalons(category),
           child: Container(
             margin: const EdgeInsets.only(bottom: 16),
             decoration: BoxDecoration(
@@ -114,10 +73,18 @@ class _ServiceListPageState extends State<ServiceListPage> {
                       color: SaloonyColors.secondary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(
-                      Icons.spa_rounded,
-                      color: SaloonyColors.secondary,
-                      size: 40,
+                    child: Image.asset(
+                      category.imagePath,
+                      width: 40,
+                      height: 40,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(
+                          Icons.store,
+                          color: SaloonyColors.secondary,
+                          size: 40,
+                        );
+                      },
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -126,7 +93,7 @@ class _ServiceListPageState extends State<ServiceListPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          treatment.treatmentName,
+                          category.displayName,
                           style: GoogleFonts.poppins(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -135,7 +102,7 @@ class _ServiceListPageState extends State<ServiceListPage> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          treatment.treatmentDescription,
+                          'Tap to view salons',
                           style: GoogleFonts.poppins(
                             fontSize: 12,
                             color: SaloonyColors.textSecondary,
@@ -157,6 +124,15 @@ class _ServiceListPageState extends State<ServiceListPage> {
           ),
         );
       },
+    );
+  }
+
+  void _navigateToSalons(SalonCategory category) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SalonsByCategoryPage(category: category),
+      ),
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:saloony/core/models/Salon.dart';
 import 'package:saloony/core/Config/Config.dart' as app_config;
 import 'package:saloony/features/Booking/views/BookAppointmentPage.dart';
+import 'package:saloony/features/Home/views/BottomNavBar.dart';
 
 class SalonDetailPage extends StatefulWidget {
   final Salon salon;

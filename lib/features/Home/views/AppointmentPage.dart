@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:saloony/core/services/AppointmentService.dart';
 import 'package:intl/intl.dart';
+import 'package:saloony/features/Home/views/BottomNavBar.dart';
 
 class AppointmentPage extends StatefulWidget {
   const AppointmentPage({super.key});
@@ -137,6 +138,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                 ),
               ],
             ),
+        bottomNavigationBar: BottomNavBar(),
     );
   }
 

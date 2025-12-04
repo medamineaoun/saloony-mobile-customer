@@ -4,6 +4,7 @@ import 'package:saloony/core/services/SalonService.dart';
 import 'package:saloony/core/services/LocationService.dart';
 import 'package:saloony/core/models/Salon.dart';
 import 'package:saloony/core/Config/Config.dart' as app_config;
+import 'package:saloony/features/Home/views/BottomNavBar.dart';
 import 'SalonDetailPage.dart';
 
 class SalonListPage extends StatefulWidget {
@@ -92,6 +93,7 @@ class _SalonListPageState extends State<SalonListPage> {
           ),
         ],
       ),
+      bottomNavigationBar: BottomNavBar(),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : Column(

@@ -45,7 +45,7 @@ class LinkSentWidget extends StatelessWidget {
                   height: 56,
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, '/resetPassword');
+                      Navigator.pushNamed(context, '/reset_password');
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.purple,

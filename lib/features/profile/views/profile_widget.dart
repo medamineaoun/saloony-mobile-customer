@@ -216,15 +216,6 @@ class ProfileWidget extends StatelessWidget {
                                         .withOpacity(0.2),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: IconButton(
-                                    icon: const Icon(
-                                      Icons.edit_outlined,
-                                      size: 20,
-                                      color: Color(0xFFF0CD97),
-                                    ),
-                                    onPressed: () =>
-                                        vm.goToProfileEdit(context),
-                                  ),
                                 ),
                               ],
                             ),

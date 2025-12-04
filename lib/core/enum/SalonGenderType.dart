@@ -8,15 +8,15 @@ enum SalonGenderType {
   mixed;
 
   static SalonGenderType fromString(String value) {
-    switch (value.toLowerCase()) {
-      case 'man':
-      case 'men':
+    switch (value.toUpperCase()) {
+      case 'MAN':
+      case 'MEN':
         return SalonGenderType.man;
-      case 'woman':
-      case 'women':
+      case 'WOMAN':
+      case 'WOMEN':
         return SalonGenderType.woman;
-      case 'mixed':
-      case 'unisex':
+      case 'MIXED':
+      case 'UNISEX':
         return SalonGenderType.mixed;
       default:
         throw ArgumentError('Invalid SalonGenderType: $value');

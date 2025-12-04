@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:saloony/features/Home/views/HomePageWidget.dart';
 import 'package:saloony/features/auth/views/VerifyEmailWidget.dart';
 import 'package:saloony/features/auth/views/VerifyResetCodeWidget.dart';
+import 'package:saloony/features/profile/views/ChangePhoneWidget.dart';
 import 'package:saloony/features/profile/views/HelpCenterScreen.dart';
+import 'package:saloony/features/profile/views/InviteFriendsView.dart';
 import 'package:saloony/features/profile/views/ResetPasswordView.dart';
 import 'package:saloony/features/profile/views/email/ChangeEmailView.dart';
 import 'package:saloony/features/profile/views/profile_edit_widget.dart';
@@ -32,8 +34,11 @@ class AppRoutes {
   static const String verifyResetCode = '/verify_reset_code';
   static const String editProfile = '/edit_profile';
   static const String resetPasswordProfile = '/reset_password_profile';
-static const String HelpCenterScreen = '/faq';
-static const String VerifyEmailChange = '/VerifyEmailChange';
+  static const String HelpCenterScreen = '/faq';
+  static const String VerifyEmailChange = '/VerifyEmailChange';
+    static const String phoneChange = '/phoneChange';
+    static const String InviteFriendsView = '/InviteFriendsView';
+
   static Map<String, WidgetBuilder> routes = {
     splash: (_) => const SaloonySplashPage(),
     signIn: (_) => const SignInWidget(),
@@ -46,10 +51,12 @@ static const String VerifyEmailChange = '/VerifyEmailChange';
     verifyEmail: (_) => const VerifyEmailWidget(),
     verifyResetCode: (_) => const VerifyResetCodeWidget(),
     editProfile: (_) => const ProfileEditView(),
-    resetPasswordProfile: (_) => const ResetPasswordViewP(),
+    resetPasswordProfile: (_) => const ResetPasswordView(),
     HelpCenterScreen: (_) => const HelpCenterScreenP(),
-        VerifyEmailChange: (_) => const VerifyEmailChangeView(),
+    VerifyEmailChange: (_) => const VerifyEmailChangeView(),
+        InviteFriendsView: (_) => const InviteFriendsScreen(),
 
+    phoneChange: (_) => const ChangePhoneWidget(),
     home: (_) => const HomePage(),
   };
 }

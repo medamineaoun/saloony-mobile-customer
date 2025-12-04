@@ -52,7 +52,7 @@ class Salon {
               ?.map((e) => AdditionalService.fromString(e.toString()))
               .toList() ??
           [],
-      type: SalonGenderType.fromString(json['type'] ?? 'UNISEX'),
+      type: SalonGenderType.fromString(json['salonGenderType'] ?? json['type'] ?? 'UNISEX'),
       salonPhotosPaths: (json['salonPhotosPaths'] as List<dynamic>?)
           ?.map((e) => e.toString())
           .toList(),
@@ -64,7 +64,7 @@ class Salon {
       salonSpecialistsIds: (json['salonSpecialistsIds'] as List<dynamic>?)
           ?.map((e) => e.toString())
           .toList(),
-      ownerId: json['ownerId'],
+      ownerId: json['salonOwnerId'] ?? json['ownerId'],
     );
   }
 }

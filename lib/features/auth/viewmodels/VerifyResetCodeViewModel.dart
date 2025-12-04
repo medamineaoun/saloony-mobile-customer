@@ -51,7 +51,7 @@ class VerifyResetCodeViewModel extends ChangeNotifier {
           if (context.mounted) {
             Navigator.pushNamed(
               context,
-              '/resetPassword',
+              '/reset_password',
               arguments: {'email': email, 'code': verificationCode},
             );
           }

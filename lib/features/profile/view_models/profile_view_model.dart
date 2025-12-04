@@ -320,16 +320,16 @@ class ProfileViewModel extends ChangeNotifier {
   void goToChangePassword(BuildContext context) {
     Navigator.pushNamed(context, '/reset_password_profile');
   }
-
+  void goToChangePhoneNumber(BuildContext context) {
+    Navigator.pushNamed(context, '/phoneChange');
+  }
 void goToChangeEmail(BuildContext context) {
     Navigator.pushNamed(context, '/VerifyEmailChange');
   }
-  void goToChangePhoneNumber(BuildContext context) {
-    Navigator.pushNamed(context, '/reset_password_profile');
-  }
+
 
   void goToInvitesFriends(BuildContext context) {
-    Navigator.pushNamed(context, '/invitesFriends');
+    Navigator.pushNamed(context, '/InviteFriendsView');
   }
 
   void goToFaq(BuildContext context) {

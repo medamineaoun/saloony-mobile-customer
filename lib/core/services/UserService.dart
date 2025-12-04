@@ -306,8 +306,35 @@ class UserService {
   }
 
  
-}
+
+
+  /// Mettre à jour le numéro de téléphone avec le code de vérification
+  Future<Map<String, dynamic>> updatePhoneNumber({
+    required String code,
+    required String newPhoneNumber,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${Config.userBaseUrl}/update-phone-number?code=$code&newPhoneNumber=$newPhoneNumber'),
+       headers: await _getAuthHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': 'Numéro de téléphone mis à jour avec succès'};
+      } else {
+        String errorMessage = 'Code invalide ou expiré';
+        try {
+          final error = jsonDecode(response.body);
+          errorMessage = error['message'] ?? errorMessage;
+        } catch (_) {}
+        return {'success': false, 'message': errorMessage};
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Erreur de connexion: $e'};
+    }
+  }
 
 void debugPrint(String message) {
   print(message);
+}
 }

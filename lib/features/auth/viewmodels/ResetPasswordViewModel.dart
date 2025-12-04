@@ -167,7 +167,7 @@ class ResetPasswordViewModel extends ChangeNotifier {
                     Navigator.of(context).pop();
                     Navigator.pushNamedAndRemoveUntil(
                       context,
-                      '/signIn',
+                      '/sign_in',
                       (route) => false,
                     );
                   },

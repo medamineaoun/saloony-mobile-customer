@@ -44,7 +44,7 @@ class ForgotPasswordViewModel extends ChangeNotifier {
         // Navigation
         Navigator.pushNamed(
           context,
-          '/verifyResetCode',
+          '/verify_reset_code',
           arguments: email,
         );
 

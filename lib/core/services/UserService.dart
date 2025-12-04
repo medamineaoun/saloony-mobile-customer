@@ -8,6 +8,59 @@ import 'package:saloony/core/models/User.dart';
 import 'package:http_parser/http_parser.dart';
 
 class UserService {
+
+    /// Désactiver ou activer le compte utilisateur
+    Future<Map<String, dynamic>> updateUserEtat(String userId, bool etat) async {
+      try {
+        final response = await http.put(
+          Uri.parse('$baseUrl/update-etat/$userId?etat=$etat'),
+          headers: await _getAuthHeaders(),
+        );
+        if (response.statusCode == 200) {
+          return {'success': true, 'message': 'Compte mis à jour'};
+        } else {
+          String errorMessage = 'Erreur lors de la mise à jour du compte';
+          try {
+            final error = jsonDecode(response.body);
+            errorMessage = error['message'] ?? errorMessage;
+          } catch (_) {}
+          return {'success': false, 'message': errorMessage};
+        }
+      } catch (e) {
+        return {'success': false, 'message': 'Erreur de connexion: $e'};
+      }
+    }
+    /// Désactiver le compte utilisateur
+Future<Map<String, dynamic>> deactivateAccount() async {
+  try {
+    final response = await http.put(
+      Uri.parse('$baseUrl/deactivate'),
+      headers: await _getAuthHeaders(),
+    );
+
+    if (response.statusCode == 200) {
+      return {
+        'success': true,
+        'message': 'Compte désactivé avec succès'
+      };
+    } else {
+      String errorMessage = "Erreur lors de la désactivation du compte";
+
+      try {
+        final error = jsonDecode(response.body);
+        errorMessage = error['message'] ?? errorMessage;
+      } catch (_) {}
+
+      return {'success': false, 'message': errorMessage};
+    }
+  } catch (e) {
+    return {
+      'success': false,
+      'message': 'Erreur de connexion: $e'
+    };
+  }
+}
+
   static String get baseUrl => Config.userBaseUrl;
   static String get baseUrlauth => Config.authBaseUrl;
 

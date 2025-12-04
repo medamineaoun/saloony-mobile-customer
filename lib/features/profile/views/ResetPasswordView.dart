@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:saloony/core/constants/SaloonyColors.dart';
+import 'package:saloony/core/constants/saloony_colors.dart';
 import 'package:saloony/core/services/AuthService.dart';
 import 'package:saloony/core/services/ToastService.dart';
 import 'package:saloony/features/profile/views/VerifyResetCodeView.dart';

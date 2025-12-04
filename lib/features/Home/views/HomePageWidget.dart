@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:saloony/features/Home/views/BottomNavBar.dart';
+import 'package:saloony/features/Home/views/SalonListPage.dart';
+import 'package:saloony/features/Home/views/SalonDetailPage.dart';
+import 'package:saloony/features/Home/views/ServiceListPage.dart';
 import 'package:saloony/core/services/TreatmentService.dart';
 import 'package:saloony/core/services/SalonService.dart';
 import 'package:saloony/core/services/AppointmentService.dart';
 import 'package:saloony/core/services/AuthService.dart';
+import 'package:saloony/core/services/LocationService.dart';
 import 'package:saloony/core/models/Treatment.dart';
 import 'package:saloony/core/models/Salon.dart';
-import 'package:saloony/core/models/User.dart';
 import 'package:saloony/core/enum/TreatmentCategory.dart';
+import 'package:saloony/core/Config/Config.dart' as app_config;
+import 'package:saloony/core/constants/saloony_colors.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -22,15 +27,15 @@ class _HomePageState extends State<HomePage> {
   late SalonService _salonService;
   late AppointmentService _appointmentService;
   late AuthService _authService;
+  late LocationService _locationService;
   
   List<Treatment> _treatments = [];
   List<Salon> _salons = [];
   List<AppointmentDTO> _appointments = [];
+  
   bool _loadingSalons = true;
   bool _loadingAppointments = true;
   String _selectedCategory = 'HAIRCUT';
-  
-  User? _currentUser;
   String? _userName = 'User';
   String? _userProfilePhoto;
 
@@ -41,11 +46,17 @@ class _HomePageState extends State<HomePage> {
     _salonService = SalonService();
     _appointmentService = AppointmentService();
     _authService = AuthService();
+    _locationService = LocationService();
     
     _loadTreatments();
     _loadSalons();
     _loadAppointments();
     _loadUserData();
+    
+    // Show location modal after page render
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showLocationPermissionModal();
+    });
   }
 
   Future<void> _loadUserData() async {
@@ -59,7 +70,149 @@ class _HomePageState extends State<HomePage> {
         });
       }
     } catch (e) {
-      debugPrint('Erreur chargement utilisateur: $e');
+      debugPrint('Error loading user: $e');
+    }
+  }
+
+  void _showLocationPermissionModal() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Titre
+                Text(
+                  'Enable Location',
+                  style: GoogleFonts.poppins(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF1B2B3E),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                
+                // Image
+                Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF0CD97).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(
+                    Icons.location_on_rounded,
+                    size: 60,
+                    color: const Color(0xFF7C3AED),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                
+                // Description
+                Text(
+                  _locationService.isWebPlatform
+                      ? 'We need to know your location in order to suggest nearby services'
+                      : 'We need to know your location in order to suggest nearby services',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                
+                // Bouton Enable Location
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      Navigator.of(context).pop();
+                      if (!_locationService.isWebPlatform) {
+                        await _requestLocationPermission();
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF7C3AED),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      'Enable Location',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                
+                // Bouton Later (optionnel)
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(
+                      'Maybe Later',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _requestLocationPermission() async {
+    try {
+      final position = await _locationService.getCurrentLocation();
+      if (position != null) {
+        debugPrint('Location obtained: ${position.latitude}, ${position.longitude}');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Location enabled successfully'),
+              duration: Duration(seconds: 2),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Please enable location in settings'),
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error obtaining location: $e');
     }
   }
 
@@ -91,7 +244,7 @@ class _HomePageState extends State<HomePage> {
           });
         } else {
           setState(() => _loadingSalons = false);
-          debugPrint('Format de salons invalide');
+          debugPrint('Invalid salon format');
         }
       } else {
         setState(() => _loadingSalons = false);
@@ -115,7 +268,7 @@ class _HomePageState extends State<HomePage> {
         setState(() => _loadingAppointments = false);
       }
     } catch (e) {
-      debugPrint('Erreur chargement rendez-vous: $e');
+      debugPrint('Error loading appointments: $e');
       setState(() => _loadingAppointments = false);
     }
   }
@@ -270,13 +423,7 @@ class _HomePageState extends State<HomePage> {
                           color: Colors.grey,
                         ),
                         const SizedBox(width: 4),
-                        Text(
-                          '5391 Elgin St. Celina, Delaware 10299',
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                        ),
+                       
                       ],
                     ),
                   ],
@@ -319,7 +466,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                             child: Center(
                               child: Text(
-                                'Aucun rendez-vous prévu',
+                                'No appointments scheduled',
                                 style: GoogleFonts.poppins(
                                   fontSize: 14,
                                   color: Colors.white,
@@ -330,35 +477,60 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
 
-            // Services Section
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: Text(
-                  'Services',
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF1B2B3E),
-                  ),
-                ),
-              ),
-            ),
+     
 
             const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
+
             SliverToBoxAdapter(
-              child: ServicesSection(
-                treatments: _filteredTreatments,
-                onCategorySelected: (category) {
-                  setState(() => _selectedCategory = category);
-                },
-                selectedCategory: _selectedCategory,
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Services',
+                          style: GoogleFonts.poppins(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: SaloonyColors.primary,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ServiceListPage(),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            'View All',
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: SaloonyColors.secondary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ServicesSection(
+                    treatments: _filteredTreatments,
+                    onCategorySelected: (category) {
+                      setState(() => _selectedCategory = category);
+                    },
+                    selectedCategory: _selectedCategory,
+                  ),
+                ],
               ),
             ),
-
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
 
             // Nearest Salon Section
@@ -377,7 +549,14 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SalonListPage(),
+                          ),
+                        );
+                      },
                       child: Text(
                         'View All',
                         style: GoogleFonts.poppins(
@@ -406,7 +585,7 @@ class _HomePageState extends State<HomePage> {
                       ? SliverToBoxAdapter(
                           child: Center(
                             child: Text(
-                              'Aucun salon disponible',
+                              'No salon available',
                               style: GoogleFonts.poppins(
                                 fontSize: 14,
                                 color: Colors.grey[600],
@@ -418,7 +597,10 @@ class _HomePageState extends State<HomePage> {
                           delegate: SliverChildBuilderDelegate(
                             (context, index) => Padding(
                               padding: const EdgeInsets.only(bottom: 16),
-                              child: SalonCard(salon: _salons[index]),
+                              child: SalonCard(
+                                salon: _salons[index],
+                                locationService: _locationService,
+                              ),
                             ),
                             childCount: _salons.length,
                           ),
@@ -626,53 +808,65 @@ class ServiceCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 3),
             ),
           ],
+          border: isSelected 
+              ? Border.all(
+                  color: const Color(0xFF7C3AED),
+                  width: 2,
+                )
+              : null,
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? Colors.white
-                    : const Color(0xFF1B2B3E).withOpacity(0.08),
-                borderRadius: BorderRadius.circular(12),
+                    ? Colors.white.withOpacity(0.9)
+                    : const Color(0xFF1B2B3E).withOpacity(0.05),
+                borderRadius: BorderRadius.circular(10),
               ),
               child: Image.asset(
                 category.imagePath,
-                width: 28,
-                height: 28,
+                width: 40,
+                height: 40,
+                fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) {
                   return Icon(
                     Icons.spa_rounded,
-                    color: isSelected ? const Color(0xFFF0CD97) : const Color(0xFFF0CD97),
-                    size: 28,
+                    color: isSelected ? const Color(0xFF7C3AED) : const Color(0xFFF0CD97),
+                    size: 40,
                   );
                 },
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              category.displayName,
-              style: GoogleFonts.poppins(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: isSelected ? Colors.white : const Color(0xFF1B2B3E),
+            const SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                category.displayName,
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: isSelected ? Colors.white : const Color(0xFF1B2B3E),
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
-              textAlign: TextAlign.center,
             ),
             if (treatmentCount > 0)
               Text(
                 '($treatmentCount)',
                 style: GoogleFonts.poppins(
-                  fontSize: 9,
-                  fontWeight: FontWeight.w400,
-                  color: isSelected ? Colors.white70 : Colors.grey,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w500,
+                  color: isSelected ? Colors.white70 : Colors.grey[600],
                 ),
               ),
           ],
@@ -685,28 +879,47 @@ class ServiceCard extends StatelessWidget {
 // Salon Card Component
 class SalonCard extends StatelessWidget {
   final Salon salon;
+  final LocationService locationService;
 
   const SalonCard({
     required this.salon,
+    required this.locationService,
   });
 
-  String get _distance {
+  String? get _distance {
     if (salon.salonLatitude == null || salon.salonLongitude == null) {
-      return 'N/A';
+      return null;
     }
-    // TODO: Calculer la distance réelle en fonction de la localisation de l'utilisateur
-    return '${(salon.salonLatitude! * 2).toStringAsFixed(1)} km';
+    
+    final distance = locationService.getDistanceToSalon(
+      salon.salonLatitude!,
+      salon.salonLongitude!,
+    );
+    
+    if (distance == null) {
+      return null;
+    }
+    
+    return '${distance.toStringAsFixed(1)} km';
   }
 
   @override
   Widget build(BuildContext context) {
-    // Construire l'URL complète de la photo
-    final baseUrl = 'http://localhost:8081/api/salon/photos/';
+    // Build complete photo URL
     final imageUrl = salon.salonPhotosPaths?.isNotEmpty == true
-        ? '$baseUrl${salon.salonPhotosPaths!.first}'
+        ? '${app_config.Config.salonBaseUrl}/photos/${salon.salonPhotosPaths!.first}'
         : 'https://via.placeholder.com/400x200';
 
-    return Container(
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SalonDetailPage(salon: salon),
+          ),
+        );
+      },
+      child: Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -757,24 +970,7 @@ class SalonCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.star,
-                          size: 16,
-                          color: Color(0xFFF0CD97),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '4.5',
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF1B2B3E),
-                          ),
-                        ),
-                      ],
-                    ),
+                   
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -797,27 +993,29 @@ class SalonCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF0CD97).withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        _distance,
-                        style: GoogleFonts.poppins(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF1B2B3E),
+                    if (_distance != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF0CD97).withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          _distance!,
+                          style: GoogleFonts.poppins(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF1B2B3E),
+                          ),
                         ),
                       ),
-                    ),
                   ],
                 ),
               ],
             ),
           ),
         ],
+      ),
       ),
     );
   }
@@ -994,14 +1192,7 @@ class _SearchFiltersModalState extends State<SearchFiltersModal> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${_selectedRating.toInt()}.0 Stars',
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
-                  ),
+                 
                 ],
               ),
               const SizedBox(height: 24),
@@ -1047,18 +1238,7 @@ class _SearchFiltersModalState extends State<SearchFiltersModal> {
                     })
                     .toList(),
               ),
-              const SizedBox(height: 24),
-
-              // Distance Filter
-              Text(
-                'Distance',
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF1B2B3E),
-                ),
-              ),
-              const SizedBox(height: 12),
+            const SizedBox(height: 12),
               Wrap(
                 spacing: 8,
                 children: [5, 10, 15, 20, 25]

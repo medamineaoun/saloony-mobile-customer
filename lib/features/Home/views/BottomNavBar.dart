@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:saloony/core/constants/app_routes.dart';
+import 'package:saloony/features/Home/views/AppointmentPage.dart';
 
 class BottomNavBar extends StatefulWidget {
   const BottomNavBar({Key? key}) : super(key: key);
@@ -11,25 +12,34 @@ class BottomNavBar extends StatefulWidget {
 class _BottomNavBarState extends State<BottomNavBar> {
   int _selectedIndex = 0;
 
-  // Liste des routes correspondantes à chaque icône
-  final List<String> _routes = [
-    AppRoutes.home,      // index 0 → Home
-    '',                  // index 1 → calendrier (non défini)
-    '',                  // index 2 → favoris (non défini)
-    AppRoutes.profile,   // index 3 → Profil
-  ];
-
   void _onItemTapped(int index) {
     setState(() => _selectedIndex = index);
 
-    final routeName = _routes[index];
-
-    if (routeName.isNotEmpty) {
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        routeName,
-        (route) => false, // pour réinitialiser la pile
-      );
+    switch (index) {
+      case 0:
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          AppRoutes.home,
+          (route) => false,
+        );
+        break;
+      case 1:
+        // Afficher la page des rendez-vous
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const AppointmentPage()),
+        );
+        break;
+      case 2:
+        // TODO: Implémenter la page des favoris
+        break;
+      case 3:
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          AppRoutes.profile,
+          (route) => false,
+        );
+        break;
     }
   }
 

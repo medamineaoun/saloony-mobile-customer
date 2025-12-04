@@ -3,29 +3,31 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:saloony/core/services/AuthService.dart';
 import 'package:saloony/core/services/TokenHelper.dart';
+import 'package:saloony/core/services/UserService.dart';
 
 class ProfileViewModel extends ChangeNotifier {
+    final UserService _userService = UserService();
   final AuthService _authService = AuthService();
   final ImagePicker _imagePicker = ImagePicker();
   
-  // État de chargement
+  // Loading state
   bool isLoading = false;
   String? errorMessage;
   
-  // Image locale sélectionnée
+  // Selected local image
   File? selectedImageFile;
 
-  // Données utilisateur
+  // User data
   String fullName = "";
   String email = "";
   String phoneNumber = "";
   String gender = "";
-  String avatarUrl = "https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=500&auto=format&fit=crop&q=60";
+  String avatarUrl = "assets/images/man-user.png";
   
-  // Données complètes de l'utilisateur
+  // Full user data
   Map<String, dynamic>? userData;
 
-  // Controllers (utile pour la page d'édition)
+  // Controllers (useful for the edit page)
   final TextEditingController fullNameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
@@ -34,9 +36,9 @@ class ProfileViewModel extends ChangeNotifier {
     loadProfile();
   }
 
-  // ==================== GESTION DE L'IMAGE ====================
+  // ==================== IMAGE MANAGEMENT ====================
 
-  /// Choisir une image depuis la galerie
+  /// Choose an image from the gallery
   Future<void> pickImageFromGallery() async {
     try {
       final XFile? image = await _imagePicker.pickImage(
@@ -50,16 +52,16 @@ class ProfileViewModel extends ChangeNotifier {
         selectedImageFile = File(image.path);
         notifyListeners();
         
-        // TODO: Upload l'image vers le serveur
+        // TODO: Upload the image to the server
         // await _uploadProfileImage(selectedImageFile!);
       }
     } catch (e) {
-      errorMessage = 'Erreur lors de la sélection de l\'image: $e';
+      errorMessage = 'Error selecting image: $e';
       notifyListeners();
     }
   }
 
-  /// Prendre une photo avec la caméra
+  /// Take a photo with the camera
   Future<void> pickImageFromCamera() async {
     try {
       final XFile? image = await _imagePicker.pickImage(
@@ -345,16 +347,51 @@ void goToChangeEmail(BuildContext context) {
     try {
       await _authService.signOut();
       if (context.mounted) {
-        Navigator.pushNamedAndRemoveUntil(context, '/splash', (route) => false);
+        Navigator.pushNamedAndRemoveUntil(context, '/sign_in', (route) => false);
       }
     } catch (e) {
       print('Error during logout: $e');
       // Forcer la déconnexion même en cas d'erreur
       if (context.mounted) {
-        Navigator.pushNamedAndRemoveUntil(context, '/splash', (route) => false);
+        Navigator.pushNamedAndRemoveUntil(context, '/sign_in', (route) => false);
       }
     }
   }
+
+ Future<void> deactivateAccount(BuildContext context) async {
+  try {
+    final result = await _userService.deactivateAccount();
+
+    if (result['success'] == true) {
+      if (context.mounted) {
+        await _authService.signOut();
+
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/splash',
+          (route) => false,
+        );
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Compte désactivé avec succès')),
+        );
+      }
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'])),
+        );
+      }
+    }
+  } catch (e) {
+    print('Error during deactivateAccount: $e');
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erreur lors de la désactivation du compte')),
+      );
+    }
+  }
+}
 
   @override
   void dispose() {

@@ -45,5 +45,13 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Saloony a besoin d'accéder à votre localisation pour afficher les salons les plus proches.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Saloony a besoin d'accéder à votre localisation pour afficher les salons les plus proches.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Saloony a besoin d'accéder à votre localisation pour afficher les salons les plus proches.</string>
+	<key>com.google.android.geo.API_KEY</key>
+	<string>AIzaSyCVXLmm-_azJz6jBxEU3danyQgz5QMJ0WM</string>
 </dict>
 </plist>

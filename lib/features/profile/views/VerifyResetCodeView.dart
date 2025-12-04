@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:saloony/core/constants/SaloonyColors.dart';
+import 'package:saloony/core/constants/saloony_colors.dart';
 import 'package:saloony/core/services/AuthService.dart';
 import 'package:saloony/features/profile/views/NewPasswordView.dart';
 

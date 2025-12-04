@@ -32,7 +32,7 @@ class _SaloonySplashPageState extends State<SaloonySplashPage>
     _setupAnimations();
     _startAnimations();
     
-    // ✅ Vérification de l'authentification après 3 secondes
+    // ✅ Authentication check after 3 seconds
     Timer(const Duration(seconds: 3), () {
       if (mounted) {
         _checkAuthAndNavigate();
@@ -40,17 +40,17 @@ class _SaloonySplashPageState extends State<SaloonySplashPage>
     });
   }
 
-  // 🔐 Vérifier l'authentification et naviguer
+  // 🔐 Check authentication and navigate
   Future<void> _checkAuthAndNavigate() async {
     try {
       final authService = AuthService();
       
-      // Récupérer le token
+      // Retrieve the token
       final accessToken = await authService.getAccessToken();
       
-      // Vérifier si l'utilisateur est authentifié
+      // Check if the user is authenticated
       if (accessToken != null && accessToken.isNotEmpty) {
-        // Vérifier si le token n'est pas expiré
+        // Check if the token is not expired
         final isExpired = TokenHelper.isTokenExpired(accessToken);
         
         if (!isExpired) {
@@ -59,7 +59,7 @@ class _SaloonySplashPageState extends State<SaloonySplashPage>
             Navigator.pushReplacementNamed(context, AppRoutes.home);
           }
         } else {
-          // 🔄 Token expiré → Essayer de rafraîchir
+          // 🔄 Token expired → Try to refresh
           final refreshResult = await authService.refreshToken();
           
           if (refreshResult['success'] == true) {

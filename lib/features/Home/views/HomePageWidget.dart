@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:saloony/features/Home/views/BottomNavBar.dart';
 import 'package:saloony/features/Home/views/SalonListPage.dart';
@@ -10,16 +10,18 @@ import 'package:saloony/core/services/AuthService.dart';
 import 'package:saloony/core/services/LocationService.dart';
 import 'package:saloony/core/models/Treatment.dart';
 import 'package:saloony/core/models/Salon.dart';
+import 'package:saloony/core/models/TeamMember.dart';
 import 'package:saloony/core/constants/saloony_colors.dart';
 import 'package:saloony/features/Home/components/appointment_card.dart';
 import 'package:saloony/features/Home/components/services_section.dart';
 import 'package:saloony/features/Home/components/salon_card.dart';
 import 'package:saloony/features/Home/components/search_filters_modal.dart';
+import 'package:saloony/features/Home/components/advertisement_section.dart';
+import 'package:saloony/features/Home/components/specialists_section.dart';
+import 'package:saloony/features/Home/components/recommended_salons_section.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
-
-  @override
   State<HomePage> createState() => _HomePageState();
 }
 
@@ -33,9 +35,11 @@ class _HomePageState extends State<HomePage> {
   List<Treatment> _treatments = [];
   List<Salon> _salons = [];
   List<AppointmentDTO> _appointments = [];
+    List<TeamMember> _specialists = [];
   
   bool _loadingSalons = true;
   bool _loadingAppointments = true;
+    bool _loadingSpecialists = true;
   String _selectedCategory = 'HAIRCUT';
   String? _userName = 'User';
   String? _userProfilePhoto;
@@ -53,6 +57,7 @@ class _HomePageState extends State<HomePage> {
     _loadSalons();
     _loadAppointments();
     _loadUserData();
+      _loadSpecialists();
     
     // Show location modal after page render
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -243,6 +248,8 @@ class _HomePageState extends State<HomePage> {
             _salons = List<Salon>.from(salons);
             _loadingSalons = false;
           });
+          // Apr�s avoir charg� les salons, peupler la liste des sp�cialistes
+          _loadSpecialists();
         } else {
           setState(() => _loadingSalons = false);
           debugPrint('Invalid salon format');
@@ -288,6 +295,49 @@ class _HomePageState extends State<HomePage> {
         .toList();
   }
 
+  Future<void> _loadSpecialists() async {
+    try {
+      List<TeamMember> allSpecialists = [];
+
+      // Cr�er des sp�cialistes � partir des salons charg�s (placeholder)
+      for (var salon in _salons) {
+        allSpecialists.add(TeamMember(
+          id: salon.salonId ?? UniqueKey().toString(),
+          fullName: '${salon.salonName} Specialist',
+          profilePhotoPath: salon.salonPhotosPaths != null && salon.salonPhotosPaths!.isNotEmpty
+              ? salon.salonPhotosPaths!.first
+              : null,
+        ));
+      }
+
+      setState(() {
+        _specialists = allSpecialists;
+        _loadingSpecialists = false;
+      });
+    } catch (e) {
+      debugPrint('Error loading specialists: $e');
+      setState(() => _loadingSpecialists = false);
+    }
+  }
+
+  Widget _buildSpecialistsSection() {
+    return SliverToBoxAdapter(
+      child: _specialists.isEmpty
+          ? const SizedBox.shrink()
+          : SpecialistsSection(
+              specialists: _specialists,
+              onViewAll: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('View all specialists'),
+                    duration: Duration(seconds: 1),
+                  ),
+                );
+              },
+            ),
+    );
+  }
+
   Widget _buildDefaultAvatar() {
     return Container(
       decoration: BoxDecoration(
@@ -326,16 +376,22 @@ class _HomePageState extends State<HomePage> {
             _buildHeader(),
             _buildAppointmentCard(),
             const SliverToBoxAdapter(child: SizedBox(height: 16)),
+            _buildAdvertisementSection(),
+            const SliverToBoxAdapter(child: SizedBox(height: 16)),
             _buildServicesSection(),
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            _buildRecommendedSalonsSection(),
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
             _buildNearestSalonHeader(),
             const SliverToBoxAdapter(child: SizedBox(height: 16)),
             _buildSalonsList(),
+              const SliverToBoxAdapter(child: SizedBox(height: 24)),
+              _buildSpecialistsSection(),
             const SliverToBoxAdapter(child: SizedBox(height: 80)),
           ],
         ),
       ),
-        bottomNavigationBar: BottomNavBar(), // déjà présent
+        bottomNavigationBar: BottomNavBar(), // d�j� pr�sent
     );
   }
 
@@ -506,6 +562,27 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// Build advertisement section
+  Widget _buildAdvertisementSection() {
+    return SliverToBoxAdapter(
+      child: AdvertisementSection(
+        title: 'Fuel your style with rich flavor',
+        description: 'Indulge in our creamy beauty treatments',
+        backgroundColor: const Color(0xFFF5E6D3),
+        textColor: const Color(0xFF1B2B3E),
+        onBookNow: () {
+          // Navigate to booking or perform action
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Book now button pressed'),
+              duration: Duration(seconds: 1),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   /// Build services section
   Widget _buildServicesSection() {
     return SliverToBoxAdapter(
@@ -554,6 +631,24 @@ class _HomePageState extends State<HomePage> {
             selectedCategory: _selectedCategory,
           ),
         ],
+      ),
+    );
+  }
+
+  /// Build recommended salons section
+  Widget _buildRecommendedSalonsSection() {
+    return SliverToBoxAdapter(
+      child: RecommendedSalonsSection(
+        salons: _salons,
+        locationService: _locationService,
+        onViewAll: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const SalonListPage(),
+            ),
+          );
+        },
       ),
     );
   }
@@ -635,3 +730,4 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
